@@ -1,0 +1,10 @@
+version: '3'
+services:
+  ffmpeg-container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./tu_directorio_local:/scripts
+    command: /bin/bash -c "/scripts/procesar_videos.sh"
+
