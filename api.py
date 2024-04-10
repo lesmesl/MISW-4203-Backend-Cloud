@@ -1,11 +1,12 @@
 import datetime
 import jwt
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import timedelta
 from werkzeug.utils import secure_filename
+from functools import wraps
 
 import constants
 
@@ -28,6 +29,45 @@ CORS(
 
 # Setting JWT
 app.config['JWT_SECRET_KEY'] = "super-secret"
+
+
+'''
+Shared section
+'''
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if "Authorization" in request.headers:
+            token = request.headers["Authorization"].split(" ")[1]
+        if not token:
+            return jsonify({
+                "message": "token inválido",
+                "data": None,
+                "error": "Unauthorized"
+            }), 401
+        try:
+            data = jwt.decode(token, app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
+            current_user = User.query.filter_by(id=data["user_id"]).first()
+            if current_user is None:
+                return jsonify({
+                    "message": "token inválido",
+                    "data": None,
+                    "error": "Unauthorized"
+                }), 401
+        except Exception as e:
+            return jsonify({
+                "message": "algo falló",
+                "data": None,
+                "error": str(e)
+            }), 500
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
 
 '''
 Health check section
@@ -70,7 +110,8 @@ def create_user():
 
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({"message": "usuario creado", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
+    return jsonify(
+        {"message": "usuario creado", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
 
 
 @app.route('/login', methods=['POST'])
@@ -114,9 +155,12 @@ class Video(db.Model):
     path = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+
 # To upload a video
 @app.route('/video', methods=['POST'])
-def upload_video():
+@token_required
+def upload_video(current_user):
+    print(current_user.name)
     if 'video' not in request.files:
         return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
 

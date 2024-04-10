@@ -12,3 +12,4 @@ Flask-CORS
 Werkzeug
 jinja2
 PyJWT
+flask
