@@ -35,8 +35,6 @@ class User(db.Model):
     name = db.Column(db.String(50))
     password = db.Column(db.String(50))
     user = db.Column(db.String(50))
-    role = db.Column(db.String(50))
-    email = db.Column(db.String(50))
 
 
 # To create a user
