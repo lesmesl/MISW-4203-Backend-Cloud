@@ -88,7 +88,7 @@ def login():
 Video section
 '''
 
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}  # Extensiones de archivo permitidas
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}  # File extensions allowed
 
 
 def allowed_file(filename):
@@ -105,9 +105,11 @@ def upload_video():
 
     if video_file.filename == '':
         return jsonify({"error": "el nombre del archivo está vacío"}), 400
+
     if video_file and allowed_file(video_file.filename):
         video_file.save('videos-uploaded/' + secure_filename(video_file.filename))
         return jsonify({"message": "video subido exitosamente"}), 200
+
     else:
         return jsonify({"error": "formato de archivo no permitido"}), 400
 
