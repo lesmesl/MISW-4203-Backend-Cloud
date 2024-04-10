@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import create_access_token, JWTManager
 
 app = Flask(__name__)
 
