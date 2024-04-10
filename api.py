@@ -70,7 +70,7 @@ def create_user():
 
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({"message": "User created", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
+    return jsonify({"message": "usuario creado", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
 
 
 @app.route('/login', methods=['POST'])
@@ -79,25 +79,25 @@ def login():
     if user:
         expire = timedelta(minutes=30)
         access_token = create_access_token(expires_delta=expire, identity=user.id, additional_claims={"name": user.name, "email": user.email})
-        return jsonify({"message": "Login succeeded", "token": access_token})
+        return jsonify({"message": "usuario autenticado", "token": access_token})
     else:
-        return jsonify({"message": "Bad username or password"}), 401
+        return jsonify({"message": "usuario o contraseña incorrecta"}), 401
 
 
 @app.route('/upload-video', methods=['POST'])
 def upload_video():
     if 'video' not in request.files:
-        return jsonify({"error": "No se proporcionó ningún archivo de video"}), 400
+        return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
 
     video_file = request.files['video']
 
     if video_file.filename == '':
-        return jsonify({"error": "El nombre del archivo está vacío"}), 400
+        return jsonify({"error": "el nombre del archivo está vacío"}), 400
     if video_file and allowed_file(video_file.filename):
-        video_file.save('videos/' + secure_filename(video_file.filename))
-        return jsonify({"message": "Video subido exitosamente"}), 200
+        video_file.save('videos-uploaded/' + secure_filename(video_file.filename))
+        return jsonify({"message": "video subido exitosamente"}), 200
     else:
-        return jsonify({"error": "Formato de archivo no permitido"}), 400
+        return jsonify({"error": "formato de archivo no permitido"}), 400
 
 
 '''
