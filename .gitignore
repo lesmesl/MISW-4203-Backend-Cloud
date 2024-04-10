@@ -1,3 +1,8 @@
 .idea
 .venv
 .env
+# IDE files
+.idea
+
+# Compiled Python files
+__pycache__/

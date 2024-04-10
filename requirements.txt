@@ -1,2 +1,11 @@
 pika
 python-dotenv
+Flask
+Flask-Cors
+Flask-JWT
+Flask-JWT-Extended
+Flask-RESTful
+Flask-SQLAlchemy
+SQLAlchemy
+psycopg2-binary
+Flask-Migrate
