@@ -6,3 +6,7 @@
 
 # Compiled Python files
 __pycache__/
+
+# Video files
+videos-uploaded/*
+videos-converted/*
