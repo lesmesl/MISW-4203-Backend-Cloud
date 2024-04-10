@@ -1,0 +1,19 @@
+.idea
+.venv
+.env
+# IDE files
+.idea
+
+# Compiled Python files
+__pycache__/
+__pycache__/*.pyc
+
+# Video files
+videos-uploaded/
+videos-converted/
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.flv
+*.wmv
