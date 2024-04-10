@@ -84,22 +84,6 @@ def login():
         return jsonify({"message": "usuario o contraseña incorrecta"}), 401
 
 
-@app.route('/upload-video', methods=['POST'])
-def upload_video():
-    if 'video' not in request.files:
-        return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
-
-    video_file = request.files['video']
-
-    if video_file.filename == '':
-        return jsonify({"error": "el nombre del archivo está vacío"}), 400
-    if video_file and allowed_file(video_file.filename):
-        video_file.save('videos-uploaded/' + secure_filename(video_file.filename))
-        return jsonify({"message": "video subido exitosamente"}), 200
-    else:
-        return jsonify({"error": "formato de archivo no permitido"}), 400
-
-
 '''
 Video section
 '''
@@ -113,8 +97,19 @@ def allowed_file(filename):
 
 # To upload a video
 @app.route('/video', methods=['POST'])
-def video():
-    return 'unimplemented', 501
+def upload_video():
+    if 'video' not in request.files:
+        return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
+
+    video_file = request.files['video']
+
+    if video_file.filename == '':
+        return jsonify({"error": "el nombre del archivo está vacío"}), 400
+    if video_file and allowed_file(video_file.filename):
+        video_file.save('videos-uploaded/' + secure_filename(video_file.filename))
+        return jsonify({"message": "video subido exitosamente"}), 200
+    else:
+        return jsonify({"error": "formato de archivo no permitido"}), 400
 
 
 # Inicializar Flask-Migrate
