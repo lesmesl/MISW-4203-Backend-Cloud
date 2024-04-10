@@ -1,1 +1,5 @@
+# IDE files
 .idea
+
+# Compiled Python files
+__pycache__/
