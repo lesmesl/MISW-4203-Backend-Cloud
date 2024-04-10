@@ -1,6 +1,13 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_jwt_extended import create_access_token, JWTManager
+
+from datetime import timedelta
+import os
+from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 
@@ -10,6 +17,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app_context = app.app_context()
 app_context.push()
 db = SQLAlchemy(app)
+
+# Setting CORS
+CORS(
+    app,
+    origins="*",
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
+
+# Setting JWT
+app.config['JWT_SECRET_KEY'] = "super-secret"
+jwt = JWTManager(app)
 
 '''
 Health check section
@@ -55,9 +73,42 @@ def create_user():
     return jsonify({"message": "User created", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
 
 
+@app.route('/login', methods=['POST'])
+def login():
+    user = User.query.filter_by(user=request.json['user'], password=request.json['password']).first()
+    if user:
+        expire = timedelta(minutes=30)
+        access_token = create_access_token(expires_delta=expire, identity=user.id, additional_claims={"name": user.name, "email": user.email})
+        return jsonify({"message": "Login succeeded", "token": access_token})
+    else:
+        return jsonify({"message": "Bad username or password"}), 401
+
+
+@app.route('/upload-video', methods=['POST'])
+def upload_video():
+    if 'video' not in request.files:
+        return jsonify({"error": "No se proporcionó ningún archivo de video"}), 400
+
+    video_file = request.files['video']
+
+    if video_file.filename == '':
+        return jsonify({"error": "El nombre del archivo está vacío"}), 400
+    if video_file and allowed_file(video_file.filename):
+        video_file.save('videos/' + secure_filename(video_file.filename))
+        return jsonify({"message": "Video subido exitosamente"}), 200
+    else:
+        return jsonify({"error": "Formato de archivo no permitido"}), 400
+
+
 '''
 Video section
 '''
+
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}  # Extensiones de archivo permitidas
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 # To upload a video
