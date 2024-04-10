@@ -1,18 +1,19 @@
+import datetime
+import jwt
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_jwt_extended import create_access_token, JWTManager
-
 from datetime import timedelta
-import os
 from werkzeug.utils import secure_filename
 
+import constants
 
 app = Flask(__name__)
 
 # Postgresql connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/idrl'
+db_uri = f"postgresql://{constants.POSTGRESQL_USER}:{constants.POSTGRESQL_PASSWORD}@{constants.POSTGRESQL_HOST}:{constants.POSTGRESQL_PORT}/{constants.POSTGRESQL_DB}"
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app_context = app.app_context()
 app_context.push()
@@ -27,7 +28,6 @@ CORS(
 
 # Setting JWT
 app.config['JWT_SECRET_KEY'] = "super-secret"
-jwt = JWTManager(app)
 
 '''
 Health check section
@@ -78,7 +78,20 @@ def login():
     user = User.query.filter_by(user=request.json['user'], password=request.json['password']).first()
     if user:
         expire = timedelta(minutes=30)
-        access_token = create_access_token(expires_delta=expire, identity=user.id, additional_claims={"name": user.name, "email": user.email})
+
+        access_token = jwt.encode(
+            {
+                "user_id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "exp": datetime.datetime.utcnow() + expire,
+                "iat": datetime.datetime.utcnow(),
+                "nbf": datetime.datetime.utcnow()
+            },
+            "super-secret",
+            algorithm="HS256"
+        )
+
         return jsonify({"message": "usuario autenticado", "token": access_token})
     else:
         return jsonify({"message": "usuario o contraseña incorrecta"}), 401
@@ -94,6 +107,12 @@ ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv'}  # File extensions allowed
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    path = db.Column(db.String(50))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 # To upload a video
 @app.route('/video', methods=['POST'])

@@ -21,6 +21,12 @@ services:
     container_name: 'idrl-api'
     build:
       dockerfile: Dockerfile
+    environment:
+      - "POSTGRESQL_DB=idrl"
+      - "POSTGRESQL_USER=postgres"
+      - "POSTGRESQL_PASSWORD=postgres"
+      - "POSTGRESQL_HOST=postgresql"
+      - "POSTGRESQL_PORT=5432"
     ports:
       - "5050:5000"
     networks:
@@ -32,10 +38,6 @@ services:
     restart: always
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: idrl
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:

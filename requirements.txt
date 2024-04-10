@@ -1,6 +1,5 @@
 pika
 python-dotenv
-Flask~=3.0.3
 Flask-Cors
 Flask-JWT
 Flask-JWT-Extended
@@ -10,4 +9,6 @@ SQLAlchemy
 psycopg2-binary
 Flask-Migrate
 Flask-CORS
-werkzeug
+Werkzeug
+jinja2
+PyJWT

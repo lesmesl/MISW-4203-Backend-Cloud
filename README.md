@@ -1,5 +1,9 @@
 # MISW-4203-Backend-Mobile
 
+## ejecutar el api
+```bash
+docker-compose up -d
+```
 
 ## formato de json para el consumer
 ```json
