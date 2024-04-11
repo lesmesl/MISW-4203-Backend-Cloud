@@ -205,6 +205,10 @@ def run():
         # Establecer conexión con RabbitMQ
         start_channel, start_connection = RabbitConnection.start_connection()
 
+        # publicar mensaje
+        publisher = RabbitPublisher(start_channel, start_connection)
+        publisher.publish_message(
+            {'message': 'Hola mundo'})
 
         # Crear instancia de RabbitConsumer y consumir la cola
         consumer = RabbitConsumer(

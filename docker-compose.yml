@@ -7,10 +7,11 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    depends_on:
+      - postgresql
     environment:
       - "RABBITMQ_DEFAULT_USER=admin"
       - "RABBITMQ_DEFAULT_PASS=admin"
-
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
@@ -21,12 +22,18 @@ services:
     container_name: 'idrl-api'
     build:
       dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - postgresql
+      - rabbitmq
     environment:
       - "POSTGRESQL_DB=idrl"
       - "POSTGRESQL_USER=postgres"
       - "POSTGRESQL_PASSWORD=postgres"
       - "POSTGRESQL_HOST=postgresql"
       - "POSTGRESQL_PORT=5432"
+    volumes:
+      - .:/app
     ports:
       - "5050:5000"
     networks:
@@ -36,6 +43,10 @@ services:
     image: postgres:latest
     container_name: 'idrl-db'
     restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: idrl
     ports:
       - "5432:5432"
     volumes:

@@ -33,3 +33,8 @@ RETRY_DELAY_CONNECTION = 1
 MAX_PUBLISH_RETRIES = 2
 RETRY_DELAY_PUBLISH = 1
 ```
+
+## Comando para eliminar contenedores, imágenes y volúmenes
+```bash 
+docker-compose down -v --rmi all
+```

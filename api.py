@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 
 import constants
+from manager_broker import RabbitConnection, RabbitPublisher
 
 app = Flask(__name__)
 
@@ -203,6 +204,23 @@ def upload_video(current_user):
     db.session.commit()
 
     # TODO: Implement a task queue to process the video
+
+    # Establecer conexión con RabbitMQ
+    start_channel, start_connection = RabbitConnection.start_connection()
+
+    # publicar mensaje
+    publisher = RabbitPublisher(start_channel, start_connection)
+
+    publisher.publish_message(
+        {
+            "file_name": video_file.filename,
+            "file_path": video_name,
+            "user_id": current_user.id,
+            "task_id": task.id,
+            "video_id": video.id
+        }
+    )
+
 
     return jsonify({"message": "video subido exitosamente"}), 200
 
