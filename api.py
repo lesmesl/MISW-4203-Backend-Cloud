@@ -133,7 +133,7 @@ def login():
             algorithm="HS256"
         )
 
-        return jsonify({"message": "usuario autenticado", "token": access_token})
+        return jsonify({"message": "usuario autenticado", "token": access_token.decode('utf-8')})
     else:
         return jsonify({"message": "usuario o contraseña incorrecta"}), 401
 
