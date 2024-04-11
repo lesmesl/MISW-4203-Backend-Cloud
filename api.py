@@ -48,6 +48,14 @@ def token_required(f):
                 "data": None,
                 "error": "Unauthorized"
             }), 401
+
+        if token == "null" or token == "undefined" or token == "NaN" or token == "false" or token == "true" or token == "0" or token == "1" or token == "":
+            return jsonify({
+                               "message": "token inválido",
+                                "data": None,
+                                "error": "Unauthorized"
+            }), 401
+
         try:
             data = jwt.decode(token, app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
             current_user = User.query.filter_by(id=data["user_id"]).first()
@@ -154,18 +162,18 @@ def allowed_file(filename):
 
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    path = db.Column(db.String(100))
-    image = db.Column(db.String(100))
+    name = db.Column(db.String(500))
+    path = db.Column(db.String(500))
+    image = db.Column(db.String(500))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     rating = db.Column(db.Integer)
 
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(500))
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
-    status = db.Column(db.String(50))
+    status = db.Column(db.String(500))
 
 
 # To upload a video
