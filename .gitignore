@@ -3,6 +3,7 @@
 .env
 # IDE files
 .idea
+.DS_Store
 
 # Compiled Python files
 __pycache__/

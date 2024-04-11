@@ -153,28 +153,64 @@ class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     path = db.Column(db.String(50))
+    image = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    rating = db.Column(db.Integer)
+
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
+    status = db.Column(db.String(50))
 
 
 # To upload a video
 @app.route('/video', methods=['POST'])
 @token_required
 def upload_video(current_user):
-    print(current_user.name)
     if 'video' not in request.files:
         return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
 
     video_file = request.files['video']
+    video_name = ''
 
     if video_file.filename == '':
         return jsonify({"error": "el nombre del archivo está vacío"}), 400
 
     if video_file and allowed_file(video_file.filename):
-        video_file.save('videos-uploaded/' + secure_filename(video_file.filename))
-        return jsonify({"message": "video subido exitosamente"}), 200
-
+        now = datetime.datetime.now()
+        user_id = current_user.id
+        video_name = f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'
+        video_file.save('videos-uploaded/' + secure_filename(f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'))
     else:
         return jsonify({"error": "formato de archivo no permitido"}), 400
+
+    video = Video(
+        name=video_file.filename,
+        path='videos-uploaded/' + secure_filename(video_name),
+        user_id=current_user.id
+    )
+    db.session.add(video)
+    db.session.commit()
+
+    task = Task(
+        name=video_name,
+        video_id=video.id,
+        status="pending"
+    )
+    db.session.add(task)
+    db.session.commit()
+
+    # TODO: Implement a task queue to process the video
+
+    return jsonify({"message": "video subido exitosamente"}), 200
+
+
+@app.route('/video', methods=['GET'])
+def get_videos():
+    videos = Video.query.all()
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id} for video in videos])
 
 
 # Inicializar Flask-Migrate
