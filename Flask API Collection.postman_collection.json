@@ -1,0 +1,164 @@
+{
+	"info": {
+		"_postman_id": "b97aa501-03de-4eb5-8fb1-98674698b43f",
+		"name": "Flask API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5831053"
+	},
+	"item": [
+		{
+			"name": "Crear Usuario",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"anderson\",\n  \"email\": \"anderson@gmail.com\",\n  \"user\": \"anderson\",\n  \"password\": \"anderson\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Iniciar Sesión",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"user\": \"anderson\",\n  \"password\": \"anderson\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Subir Video",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJuYW1lIjoiYW5kZXJzb24iLCJlbWFpbCI6ImFuZGVyc29uQGdtYWlsLmNvbSIsImV4cCI6MTcxMjgwMzQwMCwiaWF0IjoxNzEyODAxNjAwLCJuYmYiOjE3MTI4MDE2MDB9.-zHjBpl1eMB9aRNqAokGx15hOb2wudjp6D1PNNTaUzU"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "video",
+							"type": "file",
+							"src": "/Users/anderson/Miso/desarrollo-nube/MISW-4203-Backend-Mobile/video3.mov"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/video",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"video"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener Videos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/videos",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"videos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener Videos Mejor Valorados",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/videos/top",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"videos",
+						"top"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Votar Video",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxMDYxNDU1MiwianRpIjoiZTAzODc3MTItMWE3Mi00ZWY5LTllOTItYWZlYzdlMjNmN2Y3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MywibmJmIjoxNzEwNjE0NTUyLCJjc3JmIjoiMjZlYTIyMGUtNGFhMi00OGViLWJmZmYtYWQ4OTIzYTVjZGJiIiwiZXhwIjoxNzEwNjE2MzUyLCJyb2xlIjoiYWRtaW4iLCJuYW1lIjoiZGVwb3J0aXN0YSIsImVtYWlsIjoiZGVwb3J0aXN0YUBnbWFpbC5jb20iLCJ1c2VyIjoiZGVwb3J0aXN0YSJ9.zU3z3e158WqeqJFrB5w6OVRMRycWZgJO-Ma_AiDUDYY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/videos/:id/vote",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"videos",
+						":id",
+						"vote"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
