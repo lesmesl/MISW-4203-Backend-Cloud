@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from datetime import timedelta
 from werkzeug.utils import secure_filename
 from functools import wraps
+from flask import send_file
 
 import constants
 from manager_broker import RabbitConnection, RabbitConsumer, RabbitPublisher
@@ -16,7 +17,6 @@ from manager_broker import RabbitConnection, RabbitConsumer, RabbitPublisher
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
-
 
 app = Flask(__name__)
 
@@ -36,7 +36,6 @@ CORS(
 
 # Setting JWT
 app.config['JWT_SECRET_KEY'] = "super-secret"
-
 
 '''
 Shared section
@@ -58,9 +57,9 @@ def token_required(f):
 
         if token == "null" or token == "undefined" or token == "NaN" or token == "false" or token == "true" or token == "0" or token == "1" or token == "":
             return jsonify({
-                               "message": "token inválido",
-                                "data": None,
-                                "error": "Unauthorized"
+                "message": "token inválido",
+                "data": None,
+                "error": "Unauthorized"
             }), 401
 
         try:
@@ -84,6 +83,34 @@ def token_required(f):
     return decorated
 
 
+# Models
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    password = db.Column(db.String(50))
+    user = db.Column(db.String(50))
+    email = db.Column(db.String(100))
+
+
+class Video(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(500))
+    path = db.Column(db.String(500))
+    image = db.Column(db.String(500))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    rating = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(500))
+    video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    status = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
 '''
 Health check section
 '''
@@ -104,18 +131,12 @@ Users section
 '''
 
 
-# User model
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    password = db.Column(db.String(50))
-    user = db.Column(db.String(50))
-    email = db.Column(db.String(100))
-
-
 # To create a user
-@app.route('/users', methods=['POST'])
+@app.route('/api/auth/signup', methods=['POST'])
 def create_user():
+    if request.json['password'] != request.json['password_confirmation']:
+        return jsonify({"message": "las contraseñas no coinciden"}), 400
+
     new_user = User(
         name=request.json['name'],
         email=request.json['email'],
@@ -129,7 +150,7 @@ def create_user():
         {"message": "usuario creado", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     user = User.query.filter_by(user=request.json['user'], password=request.json['password']).first()
     if user:
@@ -167,42 +188,81 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-class Video(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(500))
-    path = db.Column(db.String(500))
-    image = db.Column(db.String(500))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    rating = db.Column(db.Integer)
+@app.route('/videos', methods=['GET'])
+def get_videos():
+    videos = Video.query.all()
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path,
+                     "user_id": video.user_id, "rating": video.rating} for video in videos])
 
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(500))
-    video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
-    status = db.Column(db.String(500))
+@app.route('/videos/top', methods=['GET'])
+def get_top_videos():
+    # Obtener los videos con mayor rating incluyendo el usuario que lo subió
+    videos = db.session.query(Video, User).join(User).order_by(Video.rating.desc()).all()
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path,
+                     "user_id": video.user_id, "rating": video.rating,
+                     "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
+
+
+@app.route('/videos/<int:video_id>/vote', methods=['POST'])
+def vote_video(video_id):
+    video = Video.query.get(video_id)
+    if video is None:
+        return jsonify({"message": "video no encontrado"}), 404
+
+    if video.rating is None:
+        video.rating = 0
+
+    video.rating += 1
+    db.session.commit()
+    return jsonify({"message": "voto registrado exitosamente"}), 200
+
+
+@app.route('/video/<path:filename>', methods=['GET'])
+def send_robots_txt():
+    return send_file(app.config['BASE_DIR'] + '/robots.txt')
+
+
+'''
+Task section
+'''
+
+
+@app.route('/api/tasks', methods=['GET'])
+@token_required
+def get_tasks(current_user):
+    max_list = request.args.get('max', 10)
+    order = request.args.get('order', 1)
+
+    if order == 1:
+        tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.id.desc()).limit(max_list).all()
+    else:
+        tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.id.asc()).limit(max_list).all()
+
+    return jsonify([{"id": task.id, "name": task.name, "video_id": task.video_id, "status": task.status} for task in tasks])
 
 
 # To upload a video
-@app.route('/video', methods=['POST'])
+@app.route('/api/tasks', methods=['POST'])
 @token_required
 def upload_video(current_user):
     if 'video' not in request.files:
-        return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
+        return jsonify({"error": "no se proporcionó ningún archivo de video; la tarea no fue creada"}), 400
 
     video_file = request.files['video']
     video_name = ''
 
     if video_file.filename == '':
-        return jsonify({"error": "el nombre del archivo está vacío"}), 400
+        return jsonify({"error": "el nombre del archivo está vacío; la tarea no fue creada"}), 400
 
     if video_file and allowed_file(video_file.filename):
         now = datetime.datetime.now()
         user_id = current_user.id
         video_name = f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'
-        video_file.save('videos-uploaded/' + secure_filename(f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'))
+        video_file.save(
+            'videos-uploaded/' + secure_filename(f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'))
     else:
-        return jsonify({"error": "formato de archivo no permitido"}), 400
+        return jsonify({"error": "formato de archivo no permitido; la tarea no fue creada"}), 400
 
     video = Video(
         name=video_file.filename,
@@ -216,7 +276,7 @@ def upload_video(current_user):
     task = Task(
         name=video_name,
         video_id=video.id,
-        status="pending"
+        status="uploaded"
     )
     db.session.add(task)
     db.session.commit()
@@ -237,34 +297,25 @@ def upload_video(current_user):
         }
     )
 
-    return jsonify({"message": "video subido exitosamente"}), 200
+    return jsonify({"message": "tarea creada exitosamente"}), 200
 
 
-@app.route('/videos', methods=['GET'])
-def get_videos():
-    videos = Video.query.all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id, "rating": video.rating} for video in videos])
+@app.route('/api/tasks/<int:task_id>', methods=['GET'])
+@token_required
+def get_task(current_user, task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
+    if task is None:
+        return jsonify({"message": "tarea no encontrada"}), 404
 
-
-@app.route('/videos/top', methods=['GET'])
-def get_top_videos():
-    # Obtener los videos con mayor rating incluyendo el usuario que lo subió
-    videos = db.session.query(Video, User).join(User).order_by(Video.rating.desc()).all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id, "rating": video.rating, "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
-
-
-@app.route('/videos/<int:video_id>/vote', methods=['POST'])
-def vote_video(video_id):
-    video = Video.query.get(video_id)
+    video = Video.query.get(task.video_id)
     if video is None:
         return jsonify({"message": "video no encontrado"}), 404
 
-    if video.rating is None:
-        video.rating = 0
+    if task.status == "processed":
 
-    video.rating += 1
-    db.session.commit()
-    return jsonify({"message": "voto registrado exitosamente"}), 200
+    video_url = f"http://localhost:5050/video/{video.path}"
+    return jsonify({"id": task.id, "name": task.name, "video_id": task.video_id, "status": task.status, "video_url": video_url})
+
 
 def run_consumer():
     try:
@@ -282,13 +333,10 @@ def run_consumer():
 db.create_all()
 migrate = Migrate(app, db)
 
-
-
 if __name__ == '__main__':
-   # Crear un hilo para el consumidor
+    # Crear un hilo para el consumidor
     consumer_thread = threading.Thread(target=run_consumer)
     consumer_thread.start()
 
     # Iniciar la aplicación Flask en el hilo principal
     app.run(debug=True, host='0.0.0.0', port=5050)
-
