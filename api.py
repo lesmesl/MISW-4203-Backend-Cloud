@@ -92,10 +92,10 @@ Users section
 # User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(100))
     password = db.Column(db.String(50))
     user = db.Column(db.String(50))
-    email = db.Column(db.String(50))
+    email = db.Column(db.String(100))
 
 
 # To create a user
@@ -133,7 +133,10 @@ def login():
             algorithm="HS256"
         )
 
-        return jsonify({"message": "usuario autenticado", "token": access_token.decode('utf-8')})
+        if not isinstance(access_token, str):
+            access_token = access_token.decode('utf-8')
+
+        return jsonify({"message": "usuario autenticado", "token": access_token})
     else:
         return jsonify({"message": "usuario o contraseña incorrecta"}), 401
 
@@ -151,9 +154,9 @@ def allowed_file(filename):
 
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    path = db.Column(db.String(50))
-    image = db.Column(db.String(50))
+    name = db.Column(db.String(100))
+    path = db.Column(db.String(100))
+    image = db.Column(db.String(100))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     rating = db.Column(db.Integer)
 
