@@ -19,7 +19,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app_context = app.app_context()
 app_context.push()
 db = SQLAlchemy(app)
-
 # Setting CORS
 CORS(
     app,
@@ -189,7 +188,8 @@ def upload_video(current_user):
     video = Video(
         name=video_file.filename,
         path='videos-uploaded/' + secure_filename(video_name),
-        user_id=current_user.id
+        user_id=current_user.id,
+        rating=0
     )
     db.session.add(video)
     db.session.commit()
@@ -207,10 +207,31 @@ def upload_video(current_user):
     return jsonify({"message": "video subido exitosamente"}), 200
 
 
-@app.route('/video', methods=['GET'])
+@app.route('/videos', methods=['GET'])
 def get_videos():
     videos = Video.query.all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id} for video in videos])
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id, "rating": video.rating} for video in videos])
+
+
+@app.route('/videos/top', methods=['GET'])
+def get_top_videos():
+    # Obtener los videos con mayor rating incluyendo el usuario que lo subió
+    videos = db.session.query(Video, User).join(User).order_by(Video.rating.desc()).all()
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id, "rating": video.rating, "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
+
+
+@app.route('/videos/<int:video_id>/vote', methods=['POST'])
+def vote_video(video_id):
+    video = Video.query.get(video_id)
+    if video is None:
+        return jsonify({"message": "video no encontrado"}), 404
+
+    if video.rating is None:
+        video.rating = 0
+
+    video.rating += 1
+    db.session.commit()
+    return jsonify({"message": "voto registrado exitosamente"}), 200
 
 
 # Inicializar Flask-Migrate
