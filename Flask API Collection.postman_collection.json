@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "b97aa501-03de-4eb5-8fb1-98674698b43f",
+		"_postman_id": "2cc8410d-2ffb-42db-a1a9-d16df679fef4",
 		"name": "Flask API Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "5831053"
+		"_exporter_id": "30444108"
 	},
 	"item": [
 		{
@@ -34,6 +34,32 @@
 		},
 		{
 			"name": "Iniciar Sesión",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Este es un script de Postman que captura el token de la respuesta y lo asigna a una variable de entorno\r",
+							"\r",
+							"// Verificar si la respuesta es exitosa\r",
+							"if (responseCode.code === 200) {\r",
+							"    // Convertir la respuesta JSON en un objeto\r",
+							"    var jsonData = JSON.parse(responseBody);\r",
+							"\r",
+							"    // Capturar el token del objeto JSON\r",
+							"    var token = jsonData.token;\r",
+							"\r",
+							"    // Asignar el token a una variable de entorno en Postman\r",
+							"    pm.environment.set(\"token\", token);\r",
+							"} else {\r",
+							"    console.log(\"La solicitud no fue exitosa. Código de respuesta: \" + responseCode.code);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -61,6 +87,16 @@
 		{
 			"name": "Subir Video",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -74,7 +110,7 @@
 						{
 							"key": "video",
 							"type": "file",
-							"src": "/Users/anderson/Miso/desarrollo-nube/MISW-4203-Backend-Mobile/video3.mov"
+							"src": "/C:/Users/omenc/Music/backend-cloud/MISW-4203-Backend-Cloud/video_sin_edicion.mp4"
 						}
 					]
 				},
