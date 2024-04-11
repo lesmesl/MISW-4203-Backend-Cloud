@@ -1,4 +1,6 @@
+import threading
 import datetime
+import logging
 import jwt
 from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
@@ -9,7 +11,12 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 
 import constants
-from manager_broker import RabbitConnection, RabbitPublisher
+from manager_broker import RabbitConnection, RabbitConsumer, RabbitPublisher
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("pika").setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 
@@ -214,8 +221,6 @@ def upload_video(current_user):
     db.session.add(task)
     db.session.commit()
 
-    # TODO: Implement a task queue to process the video
-
     # Establecer conexión con RabbitMQ
     start_channel, start_connection = RabbitConnection.start_connection()
 
@@ -225,13 +230,12 @@ def upload_video(current_user):
     publisher.publish_message(
         {
             "file_name": video_file.filename,
-            "file_path": video_name,
+            "file_path": 'videos-uploaded/' + video_name,
             "user_id": current_user.id,
             "task_id": task.id,
             "video_id": video.id
         }
     )
-
 
     return jsonify({"message": "video subido exitosamente"}), 200
 
@@ -262,10 +266,29 @@ def vote_video(video_id):
     db.session.commit()
     return jsonify({"message": "voto registrado exitosamente"}), 200
 
+def run_consumer():
+    try:
+        # Establecer conexión con RabbitMQ
+        start_channel, start_connection = RabbitConnection.start_connection()
+        consumer = RabbitConsumer(start_channel, start_connection)
+        consumer.consume_queue()
+    except Exception as e:
+        logger.error(
+            f"Ocurrió un error durante el consumo de mensajes: {str(e)}")
+        raise e
+
 
 # Inicializar Flask-Migrate
 db.create_all()
 migrate = Migrate(app, db)
 
+
+
 if __name__ == '__main__':
+   # Crear un hilo para el consumidor
+    consumer_thread = threading.Thread(target=run_consumer)
+    consumer_thread.start()
+
+    # Iniciar la aplicación Flask en el hilo principal
     app.run(debug=True, host='0.0.0.0', port=5050)
+

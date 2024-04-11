@@ -8,11 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# esperar 20 segundos
-RUN sleep 20
-
 # Ejecutar scripts de Python
-RUN python create_queue_consumer.py && python create_queue_producer.py
+# RUN python create_queue_producer.py
 
 # Iniciar la aplicación
 CMD ["python", "api.py"]

@@ -6,15 +6,12 @@ import time
 import pika
 from constants import (CIPHER_KEY, EXCHANGE_QUEUE, PREFETCH_COUNT,
                        SSL_CONNECTION, MAX_CONNECTION_RETRIES,
-                       MAX_PUBLISH_RETRIES, QUEUE_CONSUMER,
+                       MAX_PUBLISH_RETRIES, QUEUE_PRODUCER,
                        RETRY_DELAY_CONNECTION,
                        RETRY_DELAY_PUBLISH, URI, ROUTING_KEY)
 
 logging.basicConfig(level=logging.INFO)
-
-# Configuración de registro para RabbitMQ
 logging.getLogger("pika").setLevel(logging.ERROR)
-
 logger = logging.getLogger(__name__)
 
 
@@ -87,30 +84,30 @@ class RabbitConsumer:
         """
         logger.info('Iniciando el consumo de mensajes...')
 
-        while True:
-            try:
 
-                # configuración del consumer
-                self.channel.basic_qos(prefetch_count=PREFETCH_COUNT)
-                self.channel.queue_declare(
-                    QUEUE_CONSUMER, durable=True)
-                # Consumir mensajes de RabbitMQ
-                self.channel.basic_consume(
-                    queue=QUEUE_CONSUMER, on_message_callback=self.process_message_callback)
-                logger.info(
-                    f'Iniciado con éxito el consumo de mensajes de la cola {QUEUE_CONSUMER}...')
-                self.channel.start_consuming()
-            
-            except (pika.exceptions.ChannelWrongStateError, pika.exceptions.AMQPConnectionError, pika.exceptions.AMQPChannelError):
-                logger.error(
-                    'Se perdió la conexión con RabbitMQ. Restableciendo la conexión...')
-                reconnected_channel, reconnected_connection = RabbitConnection.start_connection()
-                self.channel = reconnected_channel
-                self.connection = reconnected_connection
+        try:
 
-            except Exception as error:
-                logger.error(f"Error al consumir mensajes: {str(error)}")
-                raise Exception(str(error))
+            # configuración del consumer
+            self.channel.basic_qos(prefetch_count=PREFETCH_COUNT)
+            self.channel.queue_declare(
+                QUEUE_PRODUCER, durable=True)
+            # Consumir mensajes de RabbitMQ
+            self.channel.basic_consume(
+                queue=QUEUE_PRODUCER, on_message_callback=self.process_message_callback)
+            logger.info(
+                f'Iniciado con éxito el consumo de mensajes de la cola {QUEUE_PRODUCER}...')
+            self.channel.start_consuming()
+        
+        except (pika.exceptions.ChannelWrongStateError, pika.exceptions.AMQPConnectionError, pika.exceptions.AMQPChannelError):
+            logger.error(
+                'Se perdió la conexión con RabbitMQ. Restableciendo la conexión...')
+            reconnected_channel, reconnected_connection = RabbitConnection.start_connection()
+            self.channel = reconnected_channel
+            self.connection = reconnected_connection
+
+        except Exception as error:
+            logger.error(f"Error al consumir mensajes: {str(error)}")
+            raise Exception(str(error))
 
     def process_message_callback(self, ch, method, properties, body):
         """
@@ -124,24 +121,16 @@ class RabbitConsumer:
         """
 
         message_consumer = json.loads(body.decode())
-
-        message_id = message_consumer['id_event']
-        logger.info(f'Mensaje consumido con el ID: {message_id}')
-
-        logger.info(f'Procesando mensaje: {message_id}')
         logger.info(f'Mensaje: {message_consumer}')
 
-        # Publica el mensaje en RabbitMQ
-        publisher = RabbitPublisher(self.channel, self.connection)
-        publisher.publish_message(
-            {'message': 'Hola mundo'})
-
+        logger.info(f'Procesando mensaje.......')
+        
 
         # Verificar el estado del canal antes de realizar la confirmación (ack)
         if ch.is_open:
             # Confirmar el procesamiento del mensaje
             logger.info(
-                f'se inicia el retiro el mensaje del ack: {message_id}')
+                f'se inicia el retiro el mensaje del ack {method.delivery_tag}')
             ch.basic_ack(delivery_tag=method.delivery_tag)
         else:
             logger.warning(
@@ -196,35 +185,3 @@ class RabbitPublisher:
                 logger.error(f"Error al publicar el mensaje: {str(e)}")
                 break
 
-def run():
-
-    try:
-        # Inicializar variables
-        start_connection = None
-
-        # Establecer conexión con RabbitMQ
-        start_channel, start_connection = RabbitConnection.start_connection()
-
-        # publicar mensaje
-        publisher = RabbitPublisher(start_channel, start_connection)
-        publisher.publish_message(
-            {'message': 'Hola mundo'})
-
-        # Crear instancia de RabbitConsumer y consumir la cola
-        consumer = RabbitConsumer(
-            start_channel, start_connection)
-        consumer.consume_queue()
-
-    except Exception as e:
-        logger.error(
-            f"Ocurrió un error durante el consumo de mensajes: {str(e)}")
-        raise e  # elevar la excepción
-    finally:
-        # Verificar el estado del canal antes de realizar la confirmación (ack)
-        if start_connection is not None and start_connection.is_open:
-            logger.warning("Se cerrara la conexión de RabbitMQ")
-            start_connection.close()
-
-
-if __name__ == "__main__":
-    run()

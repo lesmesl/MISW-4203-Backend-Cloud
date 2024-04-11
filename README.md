@@ -38,3 +38,7 @@ RETRY_DELAY_PUBLISH = 1
 ```bash 
 docker-compose down -v --rmi all
 ```
+```bash 
+# ejecutar esté comando dentro del contenedor
+python create_queue_producer.py
+```
