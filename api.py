@@ -225,7 +225,7 @@ class Task(db.Model):
 
 
 # To upload a video
-@app.route('/api/task', methods=['POST'])
+@app.route('/api/tasks', methods=['POST'])
 @token_required
 def upload_video(current_user):
     if 'video' not in request.files:
@@ -528,8 +528,6 @@ class RabbitConsumer:
                 task.status = "completado"
                 self.db.session.commit()
 
-
-
                 logger.info(f"Video procesado: {output_filename}")
             else:
                 logger.warning("No se pudo encontrar la tarea o el video asociado al mensaje.")
@@ -594,8 +592,9 @@ class RabbitPublisher:
                 logger.error(f"Error al publicar el mensaje: {str(e)}")
                 break
 
+
 if __name__ == '__main__':
-   # Crear un hilo para el consumidor
+    # Crear un hilo para el consumidor
     consumer_thread = threading.Thread(target=run_consumer)
     consumer_thread.start()
 

@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "2cc8410d-2ffb-42db-a1a9-d16df679fef4",
+		"_postman_id": "b97aa501-03de-4eb5-8fb1-98674698b43f",
 		"name": "Flask API Collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30444108"
+		"_exporter_id": "5831053"
 	},
 	"item": [
 		{
@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"name\": \"anderson\",\n  \"email\": \"anderson@gmail.com\",\n  \"user\": \"anderson\",\n  \"password\": \"anderson\"\n}",
+					"raw": "{\n  \"name\": \"anderson\",\n  \"email\": \"anderson@gmail.com\",\n  \"user\": \"anderson\",\n  \"password\": \"anderson\",\n  \"confirm_password\": \"anderson\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -21,16 +21,77 @@
 					}
 				},
 				"url": {
-					"raw": "{{base_url}}/users",
+					"raw": "{{base_url}}/api/auth/signup",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
-						"users"
+						"api",
+						"auth",
+						"signup"
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"name": "Crear Usuario Exitosamente",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"anderson\",\n  \"email\": \"anderson@gmail.com\",\n  \"user\": \"anderson\",\n  \"password\": \"anderson\",\n  \"confirm_password\": \"anderson\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/3.0.2 Python/3.9.6"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 12 Apr 2024 02:44:44 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "134"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"cuenta creada exitosamente\",\n    \"user\": {\n        \"email\": \"anderson@gmail.com\",\n        \"id\": 1,\n        \"name\": \"anderson\"\n    }\n}"
+				}
+			]
 		},
 		{
 			"name": "Iniciar Sesión",
@@ -39,20 +100,18 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"// Este es un script de Postman que captura el token de la respuesta y lo asigna a una variable de entorno\r",
-							"\r",
-							"// Verificar si la respuesta es exitosa\r",
-							"if (responseCode.code === 200) {\r",
-							"    // Convertir la respuesta JSON en un objeto\r",
-							"    var jsonData = JSON.parse(responseBody);\r",
-							"\r",
-							"    // Capturar el token del objeto JSON\r",
-							"    var token = jsonData.token;\r",
-							"\r",
-							"    // Asignar el token a una variable de entorno en Postman\r",
-							"    pm.environment.set(\"token\", token);\r",
-							"} else {\r",
-							"    console.log(\"La solicitud no fue exitosa. Código de respuesta: \" + responseCode.code);\r",
+							"",
+							"if (responseCode.code === 200) {",
+							"    // Convertir la respuesta JSON en un objeto",
+							"    var jsonData = JSON.parse(responseBody);",
+							"",
+							"    // Capturar el token del objeto JSON",
+							"    var token = jsonData.token;",
+							"",
+							"    // Asignar el token a una variable de entorno en Postman",
+							"    pm.environment.set(\"token\", token);",
+							"} else {",
+							"    console.log(\"La solicitud no fue exitosa. Código de respuesta: \" + responseCode.code);",
 							"}"
 						],
 						"type": "text/javascript",
@@ -65,7 +124,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"user\": \"anderson\",\n  \"password\": \"anderson\"\n}",
+					"raw": "{\n  \"username\": \"anderson\",\n  \"password\": \"anderson\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -73,19 +132,113 @@
 					}
 				},
 				"url": {
-					"raw": "{{base_url}}/login",
+					"raw": "{{base_url}}/api/auth/login",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
+						"api",
+						"auth",
 						"login"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Iniciar Sesión Éxitosamente",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"anderson\",\n  \"password\": \"anderson\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Werkzeug/3.0.2 Python/3.9.6"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 12 Apr 2024 02:47:15 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "283"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"usuario autenticado\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJuYW1lIjoiYW5kZXJzb24iLCJlbWFpbCI6ImFuZGVyc29uQGdtYWlsLmNvbSIsImV4cCI6MTcxMjg5MTgzNSwiaWF0IjoxNzEyODkwMDM1LCJuYmYiOjE3MTI4OTAwMzV9.4BlGU_kuEUaAU8gzVl22LgzqomJC0jPv2-FnbzeV90I\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Subir Video",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "video",
+							"type": "file",
+							"src": "/Users/anderson/Miso/desarrollo-nube/MISW-4203-Backend-Mobile/video3testtestestestestsetsetetset.mov"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/tasks",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"tasks"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Subir Video",
+			"name": "Obtener Videos",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -97,47 +250,16 @@
 						}
 					]
 				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJuYW1lIjoiYW5kZXJzb24iLCJlbWFpbCI6ImFuZGVyc29uQGdtYWlsLmNvbSIsImV4cCI6MTcxMjgwMzQwMCwiaWF0IjoxNzEyODAxNjAwLCJuYmYiOjE3MTI4MDE2MDB9.-zHjBpl1eMB9aRNqAokGx15hOb2wudjp6D1PNNTaUzU"
-					}
-				],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "video",
-							"type": "file",
-							"src": "/C:/Users/omenc/Music/backend-cloud/MISW-4203-Backend-Cloud/video_sin_edicion.mp4"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{base_url}}/video",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"video"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Obtener Videos",
-			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/videos",
+					"raw": "{{base_url}}/api/tasks",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
-						"videos"
+						"api",
+						"tasks"
 					]
 				}
 			},
