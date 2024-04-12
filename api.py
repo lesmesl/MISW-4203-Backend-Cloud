@@ -78,26 +78,19 @@ def edit_video(input_file, logo, output_file,filename):
 
         # Unificar los video de imagen al inicio y final del video cargardo por el usuario
         command_video_join = f'ffmpeg -y -i {NAMEVIDEOIMAGE} -i {VIDEO_SCALE} -i {NAMEVIDEOIMAGE} -filter_complex "[0:v][0:a][1:v][1:a][2:v]concat=n=3:v=1:a=1[v]" -map "[v]" -preset ultrafast -strict -2 {output_file}'
-        logger.warning(f"Comando de unificación de imagen: {command_video_scale}")
-        
+        logger.warning(f"Comando de unificación de imagen: {command_video_join}")
+                
+        subprocess.run(command_image_video, shell=True, capture_output=True, text=True)
+        subprocess.run(command_video_cutout, shell=True, capture_output=True, text=True)
+        subprocess.run(command_video_scale, shell=True, capture_output=True, text=True)
+        subprocess.run(command_video_join, shell=True, capture_output=True, text=True)
+        logger.info("El video se procesó correctamente.")
 
-        # Ejecutar el comando de la imagen y capturar la salida
-        excute_command_image_video = subprocess.run(command_image_video, shell=True, capture_output=False, text=True)
-        excute_command_video_cutout = subprocess.run(command_video_cutout, shell=True, capture_output=False, text=True)
-        excute_command_video_scale = subprocess.run(command_video_scale, shell=True, capture_output=False, text=True)
-
-        if excute_command_image_video.returncode == 0 and excute_command_video_cutout == 0 and excute_command_video_scale.returncode == 0:
-            logger.info("El video se procesó correctamente.")
-            excute_command_video_join = subprocess.run(command_video_join, shell=True, capture_output=False, text=True)
-            
-            if excute_command_video_join.returncode == 0:
-                logger.info("El video se procesó correctamente.")
-                # Eliminamos video temporal y recortado
-                logger.info("Inicia la eliminación de videos temporales...")
-                os.remove(NAMEVIDEOIMAGE)
-                os.remove(VIDEO_CUTOUT)
-                os.remove(VIDEO_SCALE)
-                logger.info("Videos temporales eliminados con éxito.")   
+        # Eliminar videos temporales
+        os.remove(NAMEVIDEOIMAGE)
+        os.remove(VIDEO_CUTOUT)
+        os.remove(VIDEO_SCALE)
+        logger.info("Videos temporales eliminados con éxito.")   
 
     except Exception as e:
         logger.error(f"Error al procesar el video: {str(e)}")
@@ -565,23 +558,25 @@ class RabbitConsumer:
 
                 # Verificar si el archivo de salida existe
                 if os.path.exists(output_path):
-                    logger.info("La marca de agua se agregó correctamente.")
+                    logger.info("La modificación del video se realizo correctamente.")
                     # Actualizar estado de la tarea
                     task.status = "completado"
                     db.session.commit()
                 else:
-                    logger.info("Hubo un problema al agregar la marca de agua.")
+                    logger.error("Hubo un problema al agregar la marca de agua.")
                     task.status = "problema al agregar la marca de agua"
                     db.session.commit()
                 
                 logger.info(f"Video procesado: {output_filename}")
             else:
-                logger.warning("No se pudo encontrar la tarea o el video asociado al mensaje.")
+                logger.error("No se pudo encontrar la tarea o el video asociado al mensaje.")
                 task.status = "No se pudo encontrar la tarea o el video asociado al mensaje"
                 db.session.commit()
                 
         except Exception as e:
             logger.error(f"Error al procesar el mensaje: {e}")
+            task.status = "error revisar log"
+            db.session.commit()
 
         # Verificar el estado del canal antes de realizar la confirmación (ack)
         if ch.is_open:
