@@ -7,7 +7,6 @@ import jwt
 import constants
 import json
 import ssl
-import subprocess
 import time
 import pika
 
@@ -57,6 +56,7 @@ Shared section
 
 def add_watermark(video_path, watermark_path, output_path):
     ff = FFmpeg()
+    # Agregar la marca de agua al video
     ff.options(f"-i {video_path} -i {watermark_path} -filter_complex \"[1:v]scale=120:-1 [watermark]; [0:v][watermark]overlay=W-w-10:H-h-10\" {output_path}")
 
 
@@ -486,10 +486,10 @@ class RabbitConsumer:
  
                 output_dir = "videos-converted"
 
-                file = 'videos-converted/'+video.path
+                file = 'videos-uploaded/'+video.path
                 filename = video.path
                 # Nombre del archivo de salida
-                output_filename = f"{output_dir}/procesado_{filename_without_extension}"
+                output_filename = f"{output_dir}/procesado_{filename}"
                 logger.info(f"Procesando el video: {output_filename}")
                 
                 # Rutas de los archivos de video, marca de agua y salida
@@ -505,16 +505,16 @@ class RabbitConsumer:
                     print("La marca de agua se agregó correctamente.")
                     # Actualizar estado de la tarea
                     task.status = "completado"
-                    self.db.session.commit()
+                    db.session.commit()
                 else:
                     print("Hubo un problema al agregar la marca de agua.")
                     task.status = "problema al agregar la marca de agua"
-                    self.db.session.commit()
+                    db.session.commit()
                 logger.info(f"Video procesado: {output_filename}")
             else:
                 logger.warning("No se pudo encontrar la tarea o el video asociado al mensaje.")
                 task.status = "No se pudo encontrar la tarea o el video asociado al mensaje"
-                self.db.session.commit()
+                db.session.commit()
                 
         except Exception as e:
             logger.error(f"Error al procesar el mensaje: {e}")
