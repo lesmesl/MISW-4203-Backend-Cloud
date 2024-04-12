@@ -9,6 +9,7 @@ import json
 import ssl
 import time
 import pika
+import subprocess
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -56,11 +57,19 @@ Shared section
 
 def edit_video(input_file, logo, output_file):
 
-    # Recortar el video a 20 segundos y agregar el logo inicial y final
-    subprocess.run([
-        "ffmpeg", "-i", input_file, "-ss", "0", "-t", "20", "-vf", f"scale=1280:720,setsar=1:1",
-        "-i", logo, "-filter_complex", "[0:v][1:v]overlay=10:10", "-c:a", "copy", output_file
-    ])
+    # Recortar el video a 8 segundos y agregar el logo inicial y final
+    # subprocess.run([
+    #     "ffmpeg", "-i", input_file, "-ss", "0", "-t", "8", "-vf", f"scale=1280:720,setsar=1:1",
+    #     "-i", logo, "-filter_complex", "[0:v][1:v]overlay=10:10", "-c:a", "copy", output_file
+    # ])
+
+    comando = f'ffmpeg -i {input_file} -ss 0 -t 8 -vf scale=1280:720 {output_file}'
+
+    # Ejecutar el comando y capturar la salida
+    resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
+
+    print(resultado.stdout)
+
 
 
 def token_required(f):
