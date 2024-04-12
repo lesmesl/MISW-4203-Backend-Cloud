@@ -57,17 +57,12 @@ Shared section
 
 def add_watermark(input_file, watermark_path, output_file):
     # Comando de Bash que deseas ejecutar
-    comando = f'ffmpeg -i {input_file} -vf scale=1280:720 {output_file}'
+    comando = f'ffmpeg -i {input_file} -ss 0 -t 8 -vf scale=1280:720 {output_file}'
 
     # Ejecutar el comando y capturar la salida
     resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
 
-    # Imprimir la salida del comando
-    print("Salida del comando:")
     print(resultado.stdout)
-
-    # Imprimir el código de salida del comando
-    print("Código de salida:", resultado.returncode)
 
 
 def token_required(f):
