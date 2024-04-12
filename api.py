@@ -55,16 +55,52 @@ app.config['JWT_SECRET_KEY'] = "super-secret"
 Shared section
 '''
 
-def edit_video(input_file, logo, output_file):
+def edit_video(input_file, logo, output_file,filename):
+    
+    MAXTIMEVIDEO = 8
+    NAMEVIDEOIMAGE = f"imagen_temp_{filename}"
+    VIDEO_CUTOUT = f"recortado_{filename}"
+    VIDEO_SCALE = f"escalado_{filename}"
+    SCALE = "1280:720"
 
-    comando = f'ffmpeg -i {input_file} -ss 0 -t 8 -vf scale=1280:720 {output_file}'
+    try:
+        # Comando para convertir la imagen en video
+        command_image_video = f'ffmpeg -y -loop 1 -i {logo} -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -t 1 -c:v libx264 -pix_fmt yuv420p -vf "scale=1280:720" -c:a aac -shortest {NAMEVIDEOIMAGE}'
+        logger.warning(f"Comando de imagen: {command_image_video}")
 
-    # Ejecutar el comando y capturar la salida
-    resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
+        # Comando para recortar el video y copiar el audio
+        command_video_cutout = f'ffmpeg -y -i {input_file} -ss 0 -t {MAXTIMEVIDEO} -c:v copy -c:a copy {VIDEO_CUTOUT}'
+        logger.warning(f"Comando de recordado: {command_video_cutout}")
 
-    print(resultado.stdout)
+        # Comando para escalar el video
+        command_video_scale = f'ffmpeg -y -i {VIDEO_CUTOUT} -vf scale={SCALE} {VIDEO_SCALE}'
+        logger.warning(f"Comando de escalado: {command_video_scale}")
 
+        # Unificar los video de imagen al inicio y final del video cargardo por el usuario
+        command_video_join = f'ffmpeg -y -i {NAMEVIDEOIMAGE} -i {VIDEO_SCALE} -i {NAMEVIDEOIMAGE} -filter_complex "[0:v][0:a][1:v][1:a][2:v]concat=n=3:v=1:a=1[v]" -map "[v]" -preset ultrafast -strict -2 {output_file}'
+        logger.warning(f"Comando de unificación de imagen: {command_video_scale}")
+        
 
+        # Ejecutar el comando de la imagen y capturar la salida
+        excute_command_image_video = subprocess.run(command_image_video, shell=True, capture_output=False, text=True)
+        excute_command_video_cutout = subprocess.run(command_video_cutout, shell=True, capture_output=False, text=True)
+        excute_command_video_scale = subprocess.run(command_video_scale, shell=True, capture_output=False, text=True)
+
+        if excute_command_image_video.returncode == 0 and excute_command_video_cutout == 0 and excute_command_video_scale.returncode == 0:
+            logger.info("El video se procesó correctamente.")
+            excute_command_video_join = subprocess.run(command_video_join, shell=True, capture_output=False, text=True)
+            
+            if excute_command_video_join.returncode == 0:
+                logger.info("El video se procesó correctamente.")
+                # Eliminamos video temporal y recortado
+                logger.info("Inicia la eliminación de videos temporales...")
+                os.remove(NAMEVIDEOIMAGE)
+                os.remove(VIDEO_CUTOUT)
+                os.remove(VIDEO_SCALE)
+                logger.info("Videos temporales eliminados con éxito.")   
+
+    except Exception as e:
+        logger.error(f"Error al procesar el video: {str(e)}")
 
 def token_required(f):
     @wraps(f)
@@ -525,18 +561,19 @@ class RabbitConsumer:
                 watermark_path = "logo.png"
                 output_path = output_filename #"ruta/de/salida/video_con_marca_de_agua.mp4"
 
-                edit_video(video_path, watermark_path, output_path)
+                edit_video(video_path, watermark_path, output_path,filename)
 
                 # Verificar si el archivo de salida existe
                 if os.path.exists(output_path):
-                    print("La marca de agua se agregó correctamente.")
+                    logger.info("La marca de agua se agregó correctamente.")
                     # Actualizar estado de la tarea
                     task.status = "completado"
                     db.session.commit()
                 else:
-                    print("Hubo un problema al agregar la marca de agua.")
+                    logger.info("Hubo un problema al agregar la marca de agua.")
                     task.status = "problema al agregar la marca de agua"
                     db.session.commit()
+                
                 logger.info(f"Video procesado: {output_filename}")
             else:
                 logger.warning("No se pudo encontrar la tarea o el video asociado al mensaje.")
