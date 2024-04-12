@@ -1,3 +1,5 @@
+import cv2
+import os
 import threading
 import datetime
 import logging
@@ -51,6 +53,29 @@ app.config['JWT_SECRET_KEY'] = "super-secret"
 '''
 Shared section
 '''
+
+def add_watermark(video_path, watermark_path, output_path):
+    # Cargar el video y la marca de agua
+    video = cv2.VideoCapture(video_path)
+    watermark = cv2.imread(watermark_path, cv2.IMREAD_UNCHANGED)
+
+    # Obtener las dimensiones de la marca de agua
+    w_w, h_w, _ = watermark.shape
+
+    # Iterar sobre los fotogramas del video
+    while True:
+        ret, frame = video.read()
+        if not ret:
+            break
+        
+        # Agregar la marca de agua al fotograma
+        frame[10:10+h_w, 10:10+w_w, :] = watermark[:, :, :3] * (watermark[:, :, 3:] / 255.0) + frame[10:10+h_w, 10:10+w_w, :] * (1.0 - watermark[:, :, 3:] / 255.0)
+        
+        # Escribir el fotograma resultante en el archivo de salida
+        cv2.imwrite(output_path, frame)
+
+    # Liberar los recursos
+    video.release()
 
 
 def token_required(f):
@@ -355,6 +380,12 @@ class RabbitConsumer:
     def __init__(self, channel, connection):
         self.channel = channel
         self.connection = connection
+        # establecer el contexto de la base de datos
+        db_uri = f"postgresql://{constants.POSTGRESQL_USER}:{constants.POSTGRESQL_PASSWORD}@{constants.POSTGRESQL_HOST}:{constants.POSTGRESQL_PORT}/{constants.POSTGRESQL_DB}"
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app_context = app.app_context()
+        app_context.push()
 
     def consume_queue(self):
         """
@@ -406,43 +437,43 @@ class RabbitConsumer:
             video_id = message_consumer["video_id"]
             logger.info(f"Procesando el mensaje: {task_id}")
             logger.info(f"Procesando el mensaje: {video_id}")
+            
             task = Task.query.get(task_id)
+            logger.info(f"Procesando el mensaje: {task}")
             video = Video.query.get(video_id)
 
             if task and video:
-                # Procesar el video
-                # Ruta del archivo de logo
-                logo_path = "ruta/a/tus/logo.webp"
-
-                # Directorio de entrada y salida
-                input_dir = "ruta/a/tus/videos/originales"
-                output_dir = "ruta/a/tus/videos/procesados"
+                
+                logger.info("Procesando el video")
+ 
+                output_dir = "videos-converted"
 
                 file = video.path
+                logger.info(f"Procesando el video: {file}")
                 filename = video.name
+                logger.info(f"Procesando el video: {filename}")
                 extension = filename.split(".")[-1]
-                filename_without_extension = filename[:-(len(extension) + 1)]
+                logger.info(f"Procesando el video: {extension}")
 
+                filename_without_extension = filename[:-(len(extension) + 1)]
+                logger.info(f"Procesando el video: {filename_without_extension}")
                 # Nombre del archivo de salida
                 output_filename = f"{output_dir}/{filename_without_extension}_procesado.{extension}"
+                logger.info(f"Procesando el video: {output_filename}")
+                
+                # Rutas de los archivos de video, marca de agua y salida
+                video_path = file #"ruta/al/video.mp4"
+                watermark_path = "/logo.webp"
+                output_path = output_filename #"ruta/de/salida/video_con_marca_de_agua.mp4"
 
-                # Comando FFmpeg para procesar el video
-                cmd = [
-                    "ffmpeg", "-ignore_unknown", "-i", file,
-                    "-loop", "1", "-t", "3", "-i", logo_path,
-                    "-filter_complex",
-                    f"[1:v]fade=out:st=2:d=1:alpha=1,setpts=PTS-STARTPTS[logo];"
-                    f"[0:v][logo]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=auto,"
-                    f"scale=trunc(oh*a/2)*2:360,crop=360:360,pad=640:360:(ow-iw)/2:(oh-ih)/2,"
-                    f"trim=duration=20,setpts=PTS-STARTPTS[v]",
-                    "-map", "[v]", "-map", "0:a?", "-c:v", "libx264", "-c:a", "copy", "-t", "20", "-y", output_filename
-                ]
-
-                subprocess.run(cmd, check=True)
+                # Agregar la marca de agua al video
+                add_watermark(video_path, watermark_path, output_path)
 
                 # Actualizar estado de la tarea
                 task.status = "completado"
-                db.session.commit()
+                self.db.session.commit()
+
+
 
                 logger.info(f"Video procesado: {output_filename}")
             else:
