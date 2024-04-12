@@ -249,7 +249,7 @@ def upload_video(current_user):
 
     video = Video(
         name=video_file.filename,
-        path='videos-uploaded/' + secure_filename(video_name),
+        path=secure_filename(video_name),
         user_id=current_user.id,
         rating=0
     )
@@ -259,7 +259,8 @@ def upload_video(current_user):
     task = Task(
         name=video_name,
         video_id=video.id,
-        status="uploaded"
+        status="uploaded",
+        user_id=current_user.id
     )
     db.session.add(task)
     db.session.commit()
@@ -308,7 +309,7 @@ def get_task(current_user, task_id):
     if video is None:
         return jsonify({"message": "video no encontrado"}), 404
 
-    url = f'http://localhost:5050/videos/{video.name}'
+    url = f'http://localhost:5050/videos/{video.path}'
 
     return jsonify({"id": task.id, "name": task.name, "video_id": task.video_id, "status": task.status, "url": url})
 
@@ -326,25 +327,24 @@ def delete_task(current_user, task_id):
     return jsonify({"message": "tarea eliminada exitosamente"}), 200
 
 
-@app.route('/videos/<string:video_name>', methods=['GET'])
-def send_robots_txt(video_name):
-    return send_file(f'videos-uploaded/{video_name}')
+@app.route('/videos/<string:video_path>', methods=['GET'])
+def send_video_uploaded(video_path):
+    return send_file(f'videos-uploaded/{video_path}')
 
 
-@app.route('/videos', methods=['GET'])
+@app.route('/api/videos', methods=['GET'])
 def get_videos():
     videos = Video.query.all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id, "rating": video.rating} for video in videos])
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": f'http://localhost:5050/videos/{video.path}', "user_id": video.user_id, "rating": video.rating} for video in videos])
 
 
-@app.route('/videos/top', methods=['GET'])
+@app.route('/api/videos/top', methods=['GET'])
 def get_top_videos():
-    # Obtener los videos con mayor rating incluyendo el usuario que lo subió
     videos = db.session.query(Video, User).join(User).order_by(Video.rating.desc()).all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": video.path, "user_id": video.user_id, "rating": video.rating, "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": f'http://localhost:5050/videos/{video.path}', "user_id": video.user_id, "rating": video.rating, "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
 
 
-@app.route('/videos/<int:video_id>/vote', methods=['POST'])
+@app.route('/api/videos/<int:video_id>/vote', methods=['POST'])
 def vote_video(video_id):
     video = Video.query.get(video_id)
     if video is None:
