@@ -1,4 +1,8 @@
 from pyffmpeg import FFmpeg
+from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.video.fx.all import crop
+
+import ffmpeg
 import os
 import threading
 import datetime
@@ -54,11 +58,37 @@ app.config['JWT_SECRET_KEY'] = "super-secret"
 Shared section
 '''
 
-def add_watermark(video_path, watermark_path, output_path):
-    ff = FFmpeg()
-    # Agregar la marca de agua al video
-    ff.options(f"-i {video_path} -i {watermark_path} -filter_complex \"[1:v]scale=120:-1 [watermark]; [0:v][watermark]overlay=W-w-10:H-h-10\" {output_path}")
+def add_watermark(input_file, watermark_path, output_file):
+    # ff = FFmpeg()
+    # Agregar al video path en el primer y ultimo segundo la imagen de la marca de agua
+    # ff.options(
+    #     f"-i {video_path} -i {watermark_path} -filter_complex \"[1:v]scale=120:-1 [watermark]; [0:v][watermark]overlay=W-w-10:H-h-10;[0:v]trim=duration=20\" {output_path}")
+    
+    video_original = VideoFileClip(input_file)
 
+    duration = 20
+    aspect_ratio = 4 / 3
+    width = video_original.w
+    height = width / aspect_ratio
+
+    
+    # Aplicar recorte para mantener la relación de aspecto de 4:3
+    video_recortado_aspecto = crop(video_original, width=width, height=height, x_center=None, y_center=None)
+
+    # Obtener el tiempo de inicio para mantener los primeros 20 segundos
+    start_time = 0
+    
+    # Obtener el tiempo final para mantener los primeros 20 segundos
+    end_time = duration
+    
+    # Recortar el video a la duración deseada
+    video_recortado = video_recortado_aspecto.subclip(start_time, end_time)
+    
+    # Guardar el video recortado
+    video_recortado.write_videofile(output_file)
+    
+    # Imprimir las dimensiones del video recortado
+    print("Dimensiones del video recortado:", video_recortado.size)
 
 def token_required(f):
     @wraps(f)
