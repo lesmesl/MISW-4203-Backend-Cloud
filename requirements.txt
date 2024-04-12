@@ -13,4 +13,4 @@ Werkzeug
 jinja2
 PyJWT
 flask
-opencv-python
+pyffmpeg

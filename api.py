@@ -1,4 +1,4 @@
-import cv2
+from pyffmpeg import FFmpeg
 import os
 import threading
 import datetime
@@ -56,27 +56,8 @@ Shared section
 '''
 
 def add_watermark(video_path, watermark_path, output_path):
-    # Cargar el video y la marca de agua
-    video = cv2.VideoCapture(video_path)
-    watermark = cv2.imread(watermark_path, cv2.IMREAD_UNCHANGED)
-
-    # Obtener las dimensiones de la marca de agua
-    w_w, h_w, _ = watermark.shape
-
-    # Iterar sobre los fotogramas del video
-    while True:
-        ret, frame = video.read()
-        if not ret:
-            break
-        
-        # Agregar la marca de agua al fotograma
-        frame[10:10+h_w, 10:10+w_w, :] = watermark[:, :, :3] * (watermark[:, :, 3:] / 255.0) + frame[10:10+h_w, 10:10+w_w, :] * (1.0 - watermark[:, :, 3:] / 255.0)
-        
-        # Escribir el fotograma resultante en el archivo de salida
-        cv2.imwrite(output_path, frame)
-
-    # Liberar los recursos
-    video.release()
+    ff = FFmpeg()
+    ff.options(f"-i {video_path} -i {watermark_path} -filter_complex \"[1:v]scale=120:-1 [watermark]; [0:v][watermark]overlay=W-w-10:H-h-10\" {output_path}")
 
 
 def token_required(f):
@@ -257,6 +238,7 @@ def upload_video(current_user):
     task = Task(
         name=video_name,
         video_id=video.id,
+        user_id=current_user.id,
         status="uploaded"
     )
     db.session.add(task)
@@ -503,35 +485,36 @@ class RabbitConsumer:
  
                 output_dir = "videos-converted"
 
-                file = video.path
-                logger.info(f"Procesando el video: {file}")
-                filename = video.name
-                logger.info(f"Procesando el video: {filename}")
-                extension = filename.split(".")[-1]
-                logger.info(f"Procesando el video: {extension}")
-
-                filename_without_extension = filename[:-(len(extension) + 1)]
-                logger.info(f"Procesando el video: {filename_without_extension}")
+                file = 'videos-converted/'+video.path
+                filename = video.path
                 # Nombre del archivo de salida
-                output_filename = f"{output_dir}/{filename_without_extension}_procesado.{extension}"
+                output_filename = f"{output_dir}/procesado_{filename_without_extension}"
                 logger.info(f"Procesando el video: {output_filename}")
                 
                 # Rutas de los archivos de video, marca de agua y salida
                 video_path = file #"ruta/al/video.mp4"
-                watermark_path = "/logo.webp"
+                watermark_path = "watermark.png"
                 output_path = output_filename #"ruta/de/salida/video_con_marca_de_agua.mp4"
 
                 # Agregar la marca de agua al video
                 add_watermark(video_path, watermark_path, output_path)
 
-                # Actualizar estado de la tarea
-                task.status = "completado"
-                self.db.session.commit()
-
+                # Verificar si el archivo de salida existe
+                if os.path.exists(output_path):
+                    print("La marca de agua se agregó correctamente.")
+                    # Actualizar estado de la tarea
+                    task.status = "completado"
+                    self.db.session.commit()
+                else:
+                    print("Hubo un problema al agregar la marca de agua.")
+                    task.status = "problema al agregar la marca de agua"
+                    self.db.session.commit()
                 logger.info(f"Video procesado: {output_filename}")
             else:
                 logger.warning("No se pudo encontrar la tarea o el video asociado al mensaje.")
-
+                task.status = "No se pudo encontrar la tarea o el video asociado al mensaje"
+                self.db.session.commit()
+                
         except Exception as e:
             logger.error(f"Error al procesar el mensaje: {e}")
 
