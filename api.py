@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from datetime import timedelta
 from werkzeug.utils import secure_filename
 from functools import wraps
+from flask import send_file
 
 import constants
 from manager_broker import RabbitConnection, RabbitConsumer, RabbitPublisher
@@ -114,8 +115,11 @@ class User(db.Model):
 
 
 # To create a user
-@app.route('/users', methods=['POST'])
+@app.route('/api/auth/signup', methods=['POST'])
 def create_user():
+    if request.json['password'] != request.json['confirm_password']:
+        return jsonify({"message": "las contraseñas no coinciden"}), 400
+
     new_user = User(
         name=request.json['name'],
         email=request.json['email'],
@@ -126,12 +130,13 @@ def create_user():
     db.session.add(new_user)
     db.session.commit()
     return jsonify(
-        {"message": "usuario creado", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
+        {"message": "cuenta creada exitosamente", "user": {"id": new_user.id, "name": new_user.name, "email": new_user.email}})
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST'])
 def login():
-    user = User.query.filter_by(user=request.json['user'], password=request.json['password']).first()
+    user = User.query.filter_by(user=request.json['username'], password=request.json['password']).first()
+
     if user:
         expire = timedelta(minutes=30)
 
@@ -180,11 +185,12 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(500))
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     status = db.Column(db.String(500))
 
 
 # To upload a video
-@app.route('/video', methods=['POST'])
+@app.route('/api/task', methods=['POST'])
 @token_required
 def upload_video(current_user):
     if 'video' not in request.files:
@@ -216,7 +222,7 @@ def upload_video(current_user):
     task = Task(
         name=video_name,
         video_id=video.id,
-        status="pending"
+        status="uploaded"
     )
     db.session.add(task)
     db.session.commit()
@@ -238,6 +244,54 @@ def upload_video(current_user):
     )
 
     return jsonify({"message": "video subido exitosamente"}), 200
+
+
+@app.route('/api/tasks')
+@token_required
+def get_tasks(current_user):
+    max_list = request.args.get('max', 10)
+    order = request.args.get('order', 1)
+
+    if order == 1:
+        tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.id).limit(max_list).all()
+    else:
+        tasks = Task.query.filter_by(user_id=current_user.id).order_by(Task.id.desc()).limit(max_list).all()
+
+    return jsonify([{"id": task.id, "name": task.name, "video_id": task.video_id, "status": task.status} for task in tasks])
+
+
+@app.route('/api/tasks/<int:task_id>', methods=['GET'])
+@token_required
+def get_task(current_user, task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
+    if task is None:
+        return jsonify({"message": "tarea no encontrada"}), 404
+
+    video = Video.query.get(task.video_id)
+    if video is None:
+        return jsonify({"message": "video no encontrado"}), 404
+
+    url = f'http://localhost:5050/videos/{video.name}'
+
+    return jsonify({"id": task.id, "name": task.name, "video_id": task.video_id, "status": task.status, "url": url})
+
+
+@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+@token_required
+def delete_task(current_user, task_id):
+    task = Task.query.filter_by(id=task_id, user_id=current_user.id).first()
+    if task is None:
+        return jsonify({"message": "tarea no encontrada"}), 404
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"message": "tarea eliminada exitosamente"}), 200
+
+
+@app.route('/videos/<string:video_name>', methods=['GET'])
+def send_robots_txt(video_name):
+    return send_file(f'videos-uploaded/{video_name}')
 
 
 @app.route('/videos', methods=['GET'])
@@ -266,6 +320,7 @@ def vote_video(video_id):
     db.session.commit()
     return jsonify({"message": "voto registrado exitosamente"}), 200
 
+
 def run_consumer():
     try:
         # Establecer conexión con RabbitMQ
@@ -281,7 +336,6 @@ def run_consumer():
 # Inicializar Flask-Migrate
 db.create_all()
 migrate = Migrate(app, db)
-
 
 
 if __name__ == '__main__':
