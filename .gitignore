@@ -13,7 +13,6 @@ __pycache__/*.pyc
 videos-uploaded/
 videos-converted/
 *.mov
-*.mp4
 *.avi
 *.mkv
 *.flv
