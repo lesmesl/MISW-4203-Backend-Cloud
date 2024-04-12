@@ -52,3 +52,6 @@ RETRY_DELAY_CONNECTION = 1
 MAX_PUBLISH_RETRIES = 2
 RETRY_DELAY_PUBLISH = 1
 ```
+
+### Lista de videos
+https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
