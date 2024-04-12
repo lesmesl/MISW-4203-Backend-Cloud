@@ -369,9 +369,31 @@ def vote_video(video_id):
     return jsonify({"message": "voto registrado exitosamente"}), 200
 
 
+def create_queue_producer():
+    try:
+        parameters = pika.URLParameters(URI)
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        channel.queue_declare(
+            queue=str(QUEUE_PRODUCER),
+            durable=True,
+            arguments={"x-queue-type": "classic"}
+        )
+        print(f"Quees creada: {QUEUE_PRODUCER}")
+        time.sleep(3)
+        channel.exchange_declare(exchange=EXCHANGE_QUEUE, durable=True)
+        channel.queue_bind(exchange=EXCHANGE_QUEUE,
+                           queue=QUEUE_PRODUCER, routing_key=ROUTING_KEY)
+        print("ROUNTING_KEY asociado")
+
+    except Exception as error:
+        print(f"Error en el proceso: {str(error)}")
+
+
 def run_consumer():
     try:
         # Establecer conexión con RabbitMQ
+        create_queue_producer()
         start_channel, start_connection = RabbitConnection.start_connection()
         consumer = RabbitConsumer(start_channel, start_connection)
         consumer.consume_queue()
