@@ -1,8 +1,3 @@
-from pyffmpeg import FFmpeg
-from moviepy.video.io.VideoFileClip import VideoFileClip
-from moviepy.video.fx.all import crop
-
-import ffmpeg
 import os
 import threading
 import datetime
@@ -13,6 +8,7 @@ import json
 import ssl
 import time
 import pika
+import subprocess
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -58,37 +54,21 @@ app.config['JWT_SECRET_KEY'] = "super-secret"
 Shared section
 '''
 
+
 def add_watermark(input_file, watermark_path, output_file):
-    # ff = FFmpeg()
-    # Agregar al video path en el primer y ultimo segundo la imagen de la marca de agua
-    # ff.options(
-    #     f"-i {video_path} -i {watermark_path} -filter_complex \"[1:v]scale=120:-1 [watermark]; [0:v][watermark]overlay=W-w-10:H-h-10;[0:v]trim=duration=20\" {output_path}")
-    
-    video_original = VideoFileClip(input_file)
+    # Comando de Bash que deseas ejecutar
+    comando = f'ffmpeg -i {input_file} -vf scale=1280:720 {output_file}'
 
-    duration = 20
-    aspect_ratio = 4 / 3
-    width = video_original.w
-    height = width / aspect_ratio
+    # Ejecutar el comando y capturar la salida
+    resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
 
-    
-    # Aplicar recorte para mantener la relación de aspecto de 4:3
-    video_recortado_aspecto = crop(video_original, width=width, height=height, x_center=None, y_center=None)
+    # Imprimir la salida del comando
+    print("Salida del comando:")
+    print(resultado.stdout)
 
-    # Obtener el tiempo de inicio para mantener los primeros 20 segundos
-    start_time = 0
-    
-    # Obtener el tiempo final para mantener los primeros 20 segundos
-    end_time = duration
-    
-    # Recortar el video a la duración deseada
-    video_recortado = video_recortado_aspecto.subclip(start_time, end_time)
-    
-    # Guardar el video recortado
-    video_recortado.write_videofile(output_file)
-    
-    # Imprimir las dimensiones del video recortado
-    print("Dimensiones del video recortado:", video_recortado.size)
+    # Imprimir el código de salida del comando
+    print("Código de salida:", resultado.returncode)
+
 
 def token_required(f):
     @wraps(f)
