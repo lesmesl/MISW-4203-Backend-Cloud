@@ -214,6 +214,7 @@ class Video(db.Model):
     image = db.Column(db.String(500))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     rating = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
 class Task(db.Model):
@@ -222,6 +223,7 @@ class Task(db.Model):
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     status = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
 # To upload a video
@@ -278,7 +280,7 @@ def upload_video(current_user):
         }
     )
 
-    return jsonify({"message": "video subido exitosamente"}), 200
+    return jsonify({"message": "tarea de edición creada exitosamente"}), 200
 
 
 @app.route('/api/tasks')
