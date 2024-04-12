@@ -1,8 +1,4 @@
-from pyffmpeg import FFmpeg
-from moviepy.video.io.VideoFileClip import VideoFileClip
-from moviepy.video.fx.all import crop
-
-import ffmpeg
+import subprocess
 import os
 import threading
 import datetime
@@ -58,37 +54,14 @@ app.config['JWT_SECRET_KEY'] = "super-secret"
 Shared section
 '''
 
-def add_watermark(input_file, watermark_path, output_file):
-    # ff = FFmpeg()
-    # Agregar al video path en el primer y ultimo segundo la imagen de la marca de agua
-    # ff.options(
-    #     f"-i {video_path} -i {watermark_path} -filter_complex \"[1:v]scale=120:-1 [watermark]; [0:v][watermark]overlay=W-w-10:H-h-10;[0:v]trim=duration=20\" {output_path}")
-    
-    video_original = VideoFileClip(input_file)
+def edit_video(input_file, logo, output_file):
 
-    duration = 20
-    aspect_ratio = 4 / 3
-    width = video_original.w
-    height = width / aspect_ratio
+    # Recortar el video a 20 segundos y agregar el logo inicial y final
+    subprocess.run([
+        "ffmpeg", "-i", input_file, "-ss", "0", "-t", "20", "-vf", f"scale=1280:720,setsar=1:1",
+        "-i", logo, "-filter_complex", "[0:v][1:v]overlay=10:10", "-c:a", "copy", output_file
+    ])
 
-    
-    # Aplicar recorte para mantener la relación de aspecto de 4:3
-    video_recortado_aspecto = crop(video_original, width=width, height=height, x_center=None, y_center=None)
-
-    # Obtener el tiempo de inicio para mantener los primeros 20 segundos
-    start_time = 0
-    
-    # Obtener el tiempo final para mantener los primeros 20 segundos
-    end_time = duration
-    
-    # Recortar el video a la duración deseada
-    video_recortado = video_recortado_aspecto.subclip(start_time, end_time)
-    
-    # Guardar el video recortado
-    video_recortado.write_videofile(output_file)
-    
-    # Imprimir las dimensiones del video recortado
-    print("Dimensiones del video recortado:", video_recortado.size)
 
 def token_required(f):
     @wraps(f)
@@ -546,11 +519,10 @@ class RabbitConsumer:
                 
                 # Rutas de los archivos de video, marca de agua y salida
                 video_path = file #"ruta/al/video.mp4"
-                watermark_path = "watermark.png"
+                watermark_path = "logo.png"
                 output_path = output_filename #"ruta/de/salida/video_con_marca_de_agua.mp4"
 
-                # Agregar la marca de agua al video
-                add_watermark(video_path, watermark_path, output_path)
+                edit_video(video_path, watermark_path, output_path)
 
                 # Verificar si el archivo de salida existe
                 if os.path.exists(output_path):

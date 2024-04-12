@@ -13,4 +13,3 @@ Werkzeug
 jinja2
 PyJWT
 flask
-pyffmpeg
