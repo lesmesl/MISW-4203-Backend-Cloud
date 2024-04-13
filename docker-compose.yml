@@ -36,10 +36,10 @@ services:
           - ROUTING_KEY=videoKey
           - MAX_CONSUMER_RETRIES=5
           - RETRY_DELEY_CONSUMER=5
-          - MAX_CONNECTION_RETRIES=100
+          - MAX_CONNECTION_RETRIES=7
           - RETRY_DELAY_CONNECTION=5
           - MAX_PUBLISH_RETRIES=5
-          - RETRY_DELAY_PUBLISH=1
+          - RETRY_DELAY_PUBLISH=3
           - POSTGRESQL_DB=idrl
           - POSTGRESQL_USER=postgres
           - POSTGRESQL_PASSWORD=postgres
@@ -51,6 +51,7 @@ services:
       - "5050:5050"
     networks:
       - idrl-net
+
 
   postgresql:
     image: postgres:latest

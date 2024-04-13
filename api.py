@@ -55,35 +55,77 @@ app.config['JWT_SECRET_KEY'] = "super-secret"
 Shared section
 '''
 
+def validate_audio(path_video):
+    try:
+        logger.info(f"Validando si el video cuenta con audio: {path_video}")
+        command_get_info_video = f"ffmpeg -i {path_video}"
+        logger.info(f"Comando de validación de audio: {command_get_info_video}")
+        start_command_get_info = subprocess.run(command_get_info_video, shell=True, capture_output=True, text=True)        
+
+        has_audio = "Stream #0:1" in start_command_get_info.stderr
+
+        if has_audio:
+            logger.info("El video tiene audio.")
+            return True
+        
+        logger.info("El video NO cuenta con audio")
+        return False
+    except Exception as e:
+        logger.error(f"Error al validar el audio detalle: {str(e)}")
+        return False
+    
 def edit_video(input_file, logo, output_file,filename):
     
-    MAXTIMEVIDEO = 8
+    MAXTIMEVIDEO = 20
     NAMEVIDEOIMAGE = f"imagen_temp_{filename}"
     VIDEO_CUTOUT = f"recortado_{filename}"
     VIDEO_SCALE = f"escalado_{filename}"
     SCALE = "1280:720"
 
     try:
+
         # Comando para convertir la imagen en video
         command_image_video = f'ffmpeg -y -loop 1 -i {logo} -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -t 1 -c:v libx264 -pix_fmt yuv420p -vf "scale=1280:720" -c:a aac -shortest {NAMEVIDEOIMAGE}'
-        logger.warning(f"Comando de imagen: {command_image_video}")
+        logger.info(f"Comando de imagen: {command_image_video}")
 
+        status_command_image_video = subprocess.run(command_image_video, shell=True, capture_output=True, text=True)   
+        if status_command_image_video.returncode != 0:
+            logger.error(f"Error al ejecutar el comando de imagen: {status_command_image_video.stderr}")
+            raise Exception(f"Error al ejecutar el comando de imagen: {status_command_image_video.stderr}")
+        
         # Comando para recortar el video y copiar el audio
         command_video_cutout = f'ffmpeg -y -i {input_file} -ss 0 -t {MAXTIMEVIDEO} -c:v copy -c:a copy {VIDEO_CUTOUT}'
-        logger.warning(f"Comando de recordado: {command_video_cutout}")
+        logger.info(f"Comando de recordado: {command_video_cutout}")
 
+        status_command_video_cutout = subprocess.run(command_video_cutout, shell=True, capture_output=True, text=True)
+        if status_command_video_cutout.returncode != 0:
+            logger.error(f"Error al ejecutar el comando de recorte: {status_command_video_cutout.stderr}")
+            raise Exception(f"Error al ejecutar el comando de recorte: {status_command_video_cutout.stderr}")
+        
         # Comando para escalar el video
         command_video_scale = f'ffmpeg -y -i {VIDEO_CUTOUT} -vf scale={SCALE} {VIDEO_SCALE}'
-        logger.warning(f"Comando de escalado: {command_video_scale}")
+        logger.info(f"Comando de escalado: {command_video_scale}")
 
-        # Unificar los video de imagen al inicio y final del video cargardo por el usuario
-        command_video_join = f'ffmpeg -y -i {NAMEVIDEOIMAGE} -i {VIDEO_SCALE} -i {NAMEVIDEOIMAGE} -filter_complex "[0:v][0:a][1:v][1:a][2:v]concat=n=3:v=1:a=1[v]" -map "[v]" -preset ultrafast -strict -2 {output_file}'
-        logger.warning(f"Comando de unificación de imagen: {command_video_join}")
+        status_command_video_scale = subprocess.run(command_video_scale, shell=True, capture_output=True, text=True)
+        if status_command_video_scale.returncode != 0:
+            logger.error(f"Error al ejecutar el comando de escalado: {status_command_video_scale.stderr}")
+            raise Exception(f"Error al ejecutar el comando de escalado: {status_command_video_scale.stderr}")
+        
                 
-        subprocess.run(command_image_video, shell=True, capture_output=True, text=True)
-        subprocess.run(command_video_cutout, shell=True, capture_output=True, text=True)
-        subprocess.run(command_video_scale, shell=True, capture_output=True, text=True)
-        subprocess.run(command_video_join, shell=True, capture_output=True, text=True)
+        # validamos si el VIDEO_SCALE cuenta con audio
+        if validate_audio(VIDEO_SCALE):
+            command_video_join = f'ffmpeg -y -i {NAMEVIDEOIMAGE} -i {VIDEO_SCALE} -i {NAMEVIDEOIMAGE} -filter_complex "[0:v][0:a][1:v][1:a][2:v]concat=n=3:v=1:a=1[v]" -map "[v]" -preset ultrafast -strict -2 {output_file}'
+        else:
+            command_video_join = f'ffmpeg -y -i {NAMEVIDEOIMAGE} -i {VIDEO_SCALE} -i {NAMEVIDEOIMAGE} -filter_complex "[0:v][1:v][2:v]concat=n=3:v=1:a=0[v]" -map "[v]" -preset ultrafast -strict -2 {output_file}'
+        
+        # Comando para escalar el video
+        logger.info(f"Comando de unificación de imagen: {command_video_join}")
+        status_command_video_join = subprocess.run(command_video_join, shell=True, capture_output=True, text=True)
+
+        if status_command_video_join.returncode != 0:
+            logger.error(f"Error al ejecutar el comando de unificación de imagen: {status_command_video_join.stderr}")
+            raise Exception(f"Error al ejecutar el comando de unificación de imagen: {status_command_video_join.stderr}")
+
         logger.info("El video se procesó correctamente.")
 
         # Eliminar videos temporales
@@ -125,6 +167,7 @@ def token_required(f):
                     "error": "Unauthorized"
                 }), 401
         except Exception as e:
+            logger.error(f"Error al decodificar el token: {str(e)}")
             return jsonify({
                 "message": "algo falló",
                 "data": None,
@@ -375,43 +418,46 @@ def vote_video(video_id):
 
 
 def create_queue_producer():
-    try:
-        parameters = pika.URLParameters(URI)
-        connection = pika.BlockingConnection(parameters)
-        channel = connection.channel()
-        channel.queue_declare(
-            queue=str(QUEUE_PRODUCER),
-            durable=True,
-            arguments={"x-queue-type": "classic"}
-        )
-        print(f"Quees creada: {QUEUE_PRODUCER}")
-        time.sleep(3)
-        channel.exchange_declare(exchange=EXCHANGE_QUEUE, durable=True)
-        channel.queue_bind(exchange=EXCHANGE_QUEUE,
-                           queue=QUEUE_PRODUCER, routing_key=ROUTING_KEY)
-        print("ROUNTING_KEY asociado")
+    while True:
+        try:
+            parameters = pika.URLParameters(URI)
+            connection = pika.BlockingConnection(parameters)
+            channel = connection.channel()
+            channel.queue_declare(
+                queue=str(QUEUE_PRODUCER),
+                durable=True,
+                arguments={"x-queue-type": "classic"}
+            )
+            time.sleep(3)
+            channel.exchange_declare(exchange=EXCHANGE_QUEUE, durable=True)
+            channel.queue_bind(exchange=EXCHANGE_QUEUE,
+                            queue=QUEUE_PRODUCER, routing_key=ROUTING_KEY)
+            logger.info("Queue creada y asociada al routing_key")
+            break
+    
+        except Exception as error:
+            logger.error(f"Error al crear la cola esperando el servicio de RabbitMQ: {str(error)}")
+            time.sleep(5)
 
-    except Exception as error:
-        print(f"Error en el proceso: {str(error)}")
 
 
 def run_consumer():
-    try:
-        # Establecer conexión con RabbitMQ
-        create_queue_producer()
-        start_channel, start_connection = RabbitConnection.start_connection()
-        consumer = RabbitConsumer(start_channel, start_connection)
-        consumer.consume_queue()
-    except Exception as e:
-        logger.error(
-            f"Ocurrió un error durante el consumo de mensajes: {str(e)}")
-        raise e
+    while True:  # Bucle infinito para mantener el consumidor activo
+        try:
+            # Establecer conexión con RabbitMQ
+            start_channel, start_connection = RabbitConnection.start_connection()
+            consumer = RabbitConsumer(start_channel, start_connection)
+            consumer.consume_queue()
+            
+        except Exception as e:
+            logger.error(
+                f"Ocurrió un error durante el consumo de mensajes: {str(e)}")
+            time.sleep(5)  # Espera antes de volver a intentar
 
 
 # Inicializar Flask-Migrate
 db.create_all()
 migrate = Migrate(app, db)
-
 
 class RabbitConnection:
     """
@@ -427,15 +473,6 @@ class RabbitConnection:
             pika.channel.Channel: Canal de comunicación con RabbitMQ.
             pika.BlockingConnection: Conexión con RabbitMQ.
         """
-        # Configuración de RabbitMQ
-        parameters = pika.URLParameters(URI)
-
-        if SSL_CONNECTION:
-            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-            ssl_context.set_ciphers(CIPHER_KEY)
-            parameters.ssl_options = pika.SSLOptions(context=ssl_context)
-            logger.info("SSL de RabbitMQ instalado")
-
         retries = 0
         connected = False
         connection = None
@@ -443,6 +480,15 @@ class RabbitConnection:
 
         while not connected and retries < MAX_CONNECTION_RETRIES:
             try:
+                # Configuración de RabbitMQ
+                parameters = pika.URLParameters(URI)
+
+                if SSL_CONNECTION:
+                    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+                    ssl_context.set_ciphers(CIPHER_KEY)
+                    parameters.ssl_options = pika.SSLOptions(context=ssl_context)
+                    logger.info("SSL de RabbitMQ instalado")
+
                 connection = pika.BlockingConnection(parameters)
                 channel = connection.channel()
                 connected = True
@@ -488,30 +534,30 @@ class RabbitConsumer:
         """
         logger.info('Iniciando el consumo de mensajes...')
 
+        while True:
+            try:
 
-        try:
+                # configuración del consumer
+                self.channel.basic_qos(prefetch_count=PREFETCH_COUNT)
+                self.channel.queue_declare(
+                    QUEUE_PRODUCER, durable=True)
+                # Consumir mensajes de RabbitMQ
+                self.channel.basic_consume(
+                    queue=QUEUE_PRODUCER, on_message_callback=self.process_message_callback)
+                logger.info(
+                    f'Iniciado con éxito el consumo de mensajes de la cola {QUEUE_PRODUCER}...')
+                self.channel.start_consuming()
+            
+            except (pika.exceptions.ChannelWrongStateError, pika.exceptions.AMQPConnectionError, pika.exceptions.AMQPChannelError):
+                logger.error(
+                    'Se perdió la conexión con RabbitMQ. Restableciendo la conexión...')
+                reconnected_channel, reconnected_connection = RabbitConnection.start_connection()
+                self.channel = reconnected_channel
+                self.connection = reconnected_connection
 
-            # configuración del consumer
-            self.channel.basic_qos(prefetch_count=PREFETCH_COUNT)
-            self.channel.queue_declare(
-                QUEUE_PRODUCER, durable=True)
-            # Consumir mensajes de RabbitMQ
-            self.channel.basic_consume(
-                queue=QUEUE_PRODUCER, on_message_callback=self.process_message_callback)
-            logger.info(
-                f'Iniciado con éxito el consumo de mensajes de la cola {QUEUE_PRODUCER}...')
-            self.channel.start_consuming()
-        
-        except (pika.exceptions.ChannelWrongStateError, pika.exceptions.AMQPConnectionError, pika.exceptions.AMQPChannelError):
-            logger.error(
-                'Se perdió la conexión con RabbitMQ. Restableciendo la conexión...')
-            reconnected_channel, reconnected_connection = RabbitConnection.start_connection()
-            self.channel = reconnected_channel
-            self.connection = reconnected_connection
-
-        except Exception as error:
-            logger.error(f"Error al consumir mensajes: {str(error)}")
-            raise Exception(str(error))
+            except Exception as error:
+                logger.error(f"Error al consumir mensajes: {str(error)}")
+                raise Exception(str(error))
 
     def process_message_callback(self, ch, method, properties, body):
         """
@@ -637,6 +683,9 @@ class RabbitPublisher:
 
 
 if __name__ == '__main__':
+    # crea la cola
+    create_queue_producer()
+
     # Crear un hilo para el consumidor
     consumer_thread = threading.Thread(target=run_consumer)
     consumer_thread.start()

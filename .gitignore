@@ -12,9 +12,10 @@ __pycache__/*.pyc
 # Video files
 videos-uploaded/
 videos-converted/
-*.mov
-*.mp4
+video_otro_formato.mov
 *.avi
+*.mp4
+*.mov
 *.mkv
 *.flv
 *.wmv

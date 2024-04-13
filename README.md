@@ -11,28 +11,29 @@ docker compose up -d
 - Cargar la colección y las variables de entorno de postman
 
 
-```
-```bash 
-# ejecutar esté comando dentro del contenedor
-python create_queue_producer.py
-```
-
 # Comandos útiles
 
 ```bash 
 # Comando para eliminar contenedores, imágenes y volúmenes
 docker-compose down -v --rmi all
+
+# Liberar memoria si se bajarón los contenedores y sigue elevada pero borra todo
+docker system prune -a --volumes
+
+# Guia si windows se eleva la ram
+https://medium.com/@ahmadsalahuddeen6017/how-to-resolve-high-ram-usage-by-vmmem-exe-when-running-docker-on-wsl-698c92018a9f
+
 ```
 
-
-### Formato de json para el consumer
+### Formato de json para probar manualmente el consumer
 ```json
-{
-    "id_event":1,
-    "file_name": "test.pdf",
-    "file_path": "/home/user/test.pdf",
-    "user_id": 1
-}
+    {
+        "file_name": video_file.filename,
+        "file_path": 'videos-uploaded/' + video_name,
+        "user_id": current_user.id,
+        "task_id": task.id,
+        "video_id": video.id
+    }
 ```
 ### Archivo .env
 ```json
@@ -53,5 +54,7 @@ MAX_PUBLISH_RETRIES = 2
 RETRY_DELAY_PUBLISH = 1
 ```
 
-### Lista de videos
+### Lista de videos verticales
 https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
+
+
