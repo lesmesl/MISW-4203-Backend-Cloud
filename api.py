@@ -73,10 +73,11 @@ def validate_audio(path_video):
     except Exception as e:
         logger.error(f"Error al validar el audio detalle: {str(e)}")
         return False
-    
+
+
 def edit_video(input_file, logo, output_file,filename):
     
-    MAXTIMEVIDEO = 20
+    MAXTIMEVIDEO = 18
     NAMEVIDEOIMAGE = f"imagen_temp_{filename}"
     VIDEO_CUTOUT = f"recortado_{filename}"
     VIDEO_SCALE = f"escalado_{filename}"
@@ -388,7 +389,7 @@ def delete_task(current_user, task_id):
 
 @app.route('/videos/<string:video_path>', methods=['GET'])
 def send_video_uploaded(video_path):
-    return send_file(f'videos-uploaded/{video_path}')
+    return send_file(f'videos-converted/procesado_{video_path}')
 
 
 @app.route('/api/videos', methods=['GET'])
@@ -438,7 +439,6 @@ def create_queue_producer():
         except Exception as error:
             logger.error(f"Error al crear la cola esperando el servicio de RabbitMQ: {str(error)}")
             time.sleep(5)
-
 
 
 def run_consumer():
