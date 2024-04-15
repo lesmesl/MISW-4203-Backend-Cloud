@@ -20,19 +20,19 @@ El backend REST de la aplicación web ha sido implementado para proporcionar a l
 
 # Instrucciones de Instalación y Configuración
 
-# Paso 1: Levantar el Proyecto
+## Paso 1: Levantar el Proyecto
 Para iniciar el proyecto, use el siguiente comando en su terminal:
 ```bash 
 docker compose up -d
 ```
 
-# Paso 2: Cargar la colección y las variables de entorno de Postman
+## Paso 2: Cargar la colección y las variables de entorno de Postman
 Utilice las colecciones de Postman proporcionadas para probar la API y asegurarse de que todo funcione como se espera.
 
 - Cargar la colección y las variables de entorno de postman
 
 
-# Comandos útiles
+### Comandos útiles
 
 ```bash 
 # Comando para eliminar contenedores, imágenes y volúmenes
@@ -49,36 +49,19 @@ https://medium.com/@ahmadsalahuddeen6017/how-to-resolve-high-ram-usage-by-vmmem-
 ### Formato de json para probar manualmente el consumer
 ```json
     {
-        "file_name": video_file.filename,
-        "file_path": 'videos-uploaded/' + video_name,
-        "user_id": current_user.id,
-        "task_id": task.id,
-        "video_id": video.id
+        "file_name": "",
+        "file_path": "videos-uploaded + video_name",
+        "user_id": 1,
+        "task_id": 1,
+        "video_id": 1
     }
 ```
-### Archivo .env
-```json
-SSL_CONNECTION=0
-URI='amqp://admin:admin@localhost:5672'
-CIPHER_KEY='ECDHE+AESGCM:!ECDSA'
-
-PREFETCH_COUNT=1
-PRODUCER_QUEUE=videoPublishQueue
-EXCHANGE_QUEUE=videoExchange
-ROUTING_KEY=videoKey
-
-MAX_CONSUMER_RETRIES = 2
-RETRY_DELEY_CONSUMER = 5
-MAX_CONNECTION_RETRIES = 2
-RETRY_DELAY_CONNECTION = 1
-MAX_PUBLISH_RETRIES = 2
-RETRY_DELAY_PUBLISH = 1
-```
+## Enlaces
 
 ### Lista de videos verticales
 https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
-# Enlaces al Repositorio del Proyecto
+### Enlaces al Repositorio del Proyecto
 * [README](https://github.com/lesmesl/MISW-4203-Backend-Cloud/blob/main/README.md)
 * [WIKI](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki) 
 * [Diseño de Arquitectura](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Arquitectura-de-la-Aplicaci%C3%B3n:--International-FPV-Drone-Racing-League-(IDRL))
@@ -87,11 +70,11 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 * [Documentos PDF del Proyecto](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentos-PDF-del-Proyecto--IDRL)
 
 
-## Entregas del Proyecto
+# Entregas del Proyecto
 
-## Semanas 1 – 2: Entrega 1 - Aplicaciones Web Escalables en un Entorno Tradicional
+* Semanas 1 – 2: Entrega 1 - Aplicaciones Web Escalables en un Entorno Tradicional
 
-### Entregables:
+## Entregables:
 * **Aplicación web con funcionalidades básicas implementadas**.
   * **Backend REST desarrollado para la aplicación**.
     * [**Pagina WIKI Entrega 1: Backend REST + Procesamiento Asíncrono**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Backend-REST---Procesamiento-As%C3%ADncrono)
