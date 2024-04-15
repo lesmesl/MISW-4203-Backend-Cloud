@@ -67,6 +67,7 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 * [Diseño de Arquitectura](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Arquitectura-de-la-Aplicaci%C3%B3n:--International-FPV-Drone-Racing-League-(IDRL))
 * [Código General de Aplicación](https://github.com/lesmesl/MISW-4203-Backend-Cloud/blob/main) 
 * [Sustentaciones en Video](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Sustentaciones-en-Video)
+* [Documentación Páginas de la wiki del Proyecto](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentaci%C3%B3n-P%C3%A1ginas-de-la-wiki-del-Proyecto)
 * [Documentos PDF del Proyecto](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentos-PDF-del-Proyecto--IDRL)
 
 
