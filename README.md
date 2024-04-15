@@ -73,9 +73,9 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 # Entregas del Proyecto
 
-* Semanas 1 – 2: Entrega 1 - Aplicaciones Web Escalables en un Entorno Tradicional
+## Semanas 1 – 2: Entrega 1 - Aplicaciones Web Escalables en un Entorno Tradicional
 
-## Entregables:
+### Entregables:
 * **Aplicación web con funcionalidades básicas implementadas**.
   * **Backend REST desarrollado para la aplicación**.
     * [**Pagina WIKI Entrega 1: Backend REST + Procesamiento Asíncrono**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Backend-REST---Procesamiento-As%C3%ADncrono)
