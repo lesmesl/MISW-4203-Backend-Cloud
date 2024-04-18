@@ -686,9 +686,11 @@ if __name__ == '__main__':
     # crea la cola
     create_queue_producer()
 
-    # Crear un hilo para el consumidor
-    consumer_thread = threading.Thread(target=run_consumer)
-    consumer_thread.start()
+    if constants.RUN_WORKER == "true":
+        # Crear un hilo para el consumidor
+        consumer_thread = threading.Thread(target=run_consumer)
+        consumer_thread.start()
 
-    # Iniciar la aplicación Flask en el hilo principal
-    app.run(debug=True, host='0.0.0.0', port=5050)
+    if constants.RUN_SERVER == "true":
+        # Iniciar la aplicación Flask en el hilo principal
+        app.run(debug=True, host='0.0.0.0', port=5050)
