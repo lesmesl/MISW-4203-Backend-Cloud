@@ -27,10 +27,9 @@ services:
     volumes:
       - .:/app
     ports:
-      - "5050:5050"
+      - "5050:80"
     networks:
       - idrl-net
-
 
   postgresql:
     image: postgres:latest
