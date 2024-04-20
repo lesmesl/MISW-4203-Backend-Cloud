@@ -688,8 +688,9 @@ if __name__ == '__main__':
 
     if constants.RUN_WORKER == "true":
         # Crear un hilo para el consumidor
-        consumer_thread = threading.Thread(target=run_consumer)
-        consumer_thread.start()
+        # consumer_thread = threading.Thread(target=run_consumer)
+        # consumer_thread.start()
+        run_consumer()
 
     if constants.RUN_SERVER == "true":
         # Iniciar la aplicación Flask en el hilo principal
