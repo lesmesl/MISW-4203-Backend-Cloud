@@ -5,8 +5,6 @@ services:
     build:
       dockerfile: Dockerfile
     restart: always
-    depends_on:
-      - rabbitmq
     env_file:
       - .env
     volumes:
