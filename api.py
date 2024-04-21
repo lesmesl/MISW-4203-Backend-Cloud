@@ -301,9 +301,10 @@ def upload_video(current_user):
 
     if video_file and allowed_file(video_file.filename):
         now = datetime.datetime.now()
+        name_time = now.strftime('%Y%m%d%H%M%S%f')
         user_id = current_user.id
-        video_name = f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'
-        video_file.save('shared/videos-uploaded/' + secure_filename(f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'))
+        video_name = f'{name_time}-{user_id}-{video_file.filename}'
+        video_file.save('shared/videos-uploaded/' + secure_filename(f'{name_time}-{user_id}-{video_file.filename}'))
     else:
         return jsonify({"error": "formato de archivo no permitido"}), 400
 
