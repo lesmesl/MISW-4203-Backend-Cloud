@@ -43,7 +43,7 @@ app.config['SQLALCHEMY_POOL_SIZE'] = 30
 app.config['SQLALCHEMY_MAX_OVERFLOW'] = 30
 app.config['SQLALCHEMY_POOL_TIMEOUT'] = 20
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 10
-db = SQLAlchemy(app, session_options={'autocommit': True})
+db = SQLAlchemy(app)
 # Setting CORS
 CORS(
     app,
