@@ -100,3 +100,33 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
      * [**E1 - Plan de Análisis de Capacidad.pdf**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/files/14971625/E1.-.Plan.de.Analisis.de.Capacidad.pdf)
      * [**Video de demostracion de Proyecto - API + Procesos asíncronos y Colecciones en Postman, Arquitectura y Análisis de Capacidad**](https://www.youtube.com/watch?v=IJIeDC9ll08)
 * [**Manual de configuración del entorno de desarrollo y despliegue**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Configuraci%C3%B3n-del-Entorno-de-Desarrollo-y-Despliegue)
+
+## Semanas 3: Entrega 2 - Despliegue Básico en la Nube - Migración de la Aplicación Web a la Nube Pública en GCP
+
+### Actividades Previas - Backend:
+* **Aplicación web con funcionalidades básicas implementadas**
+  * **Backend REST desarrollado para la aplicación**.
+    * [**Pagina WIKI Entrega 1: Backend REST + Procesamiento Asíncrono**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Backend-REST---Procesamiento-As%C3%ADncrono)
+    * [**Código API.py**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/blob/main/api.py)
+    * [**Página WIKI Entrega 1: Documentación en Postman**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentaci%C3%B3n-en-Postman-de-la-API-REST)
+     * [**Video de demostracion de Proyecto - API + Procesos asíncronos y Colecciones en Postman, Arquitectura y Análisis de Capacidad**](https://www.youtube.com/watch?v=IJIeDC9ll08)
+
+### Entregables Semana 3:
+* **Migración de la Aplicación a la Nube**
+  * **Actividades requeridas para la migración inicial de la aplicación**
+    * [**Pagina de la wiki Entrega 2: Despliegue Básico en la Nube ‐ Migración de la Aplicación Web a la Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-2:-Despliegue-B%C3%A1sico-en-la-Nube-%E2%80%90-Migraci%C3%B3n-de-la-Aplicaci%C3%B3n-Web-a-la-Nube-P%C3%BAblica-en-GCP)
+      
+* **Arquitectura de la Aplicación**
+    * [**Página Wiki E2- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-2:-Arquitectura-de-la-Aplicaci%C3%B3n)
+    
+* **Análisis de Capacidad**
+
+  * **Ejecución pruebas de estrés sobre el modelo de despliegue Semana 3**
+     * [**Pagina Wiki E2 - Análisis de Capacidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-2:-An%C3%A1lisis-de-capacidad)
+   
+
+* [**Manual de Migración de la Aplicación y despliegue**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Migraci%C3%B3n-de-la-Aplicaci%C3%B3n-y-despliegue-GCP)
+* [**Manual de configuración del entorno de desarrollo y despliegue Entorno local**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Configuraci%C3%B3n-del-Entorno-de-Desarrollo-y-Despliegue)
+
+* **Otros**
+  * [**Análisis de Caso Práctico: Kluvin Apteekki - Caso de Una Farmacia en Finlandia**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/An%C3%A1lisis-de-Caso-Pr%C3%A1ctico:-Kluvin-Apteeki-%E2%80%90-Caso-de-una-farmacia-en-Finlandia)
