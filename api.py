@@ -473,8 +473,8 @@ def run_consumer():
 # Upload files google buckets
 def upload_files_buckets(local_filename, remote_filename, remote_path):
     account = constants.GCP_ACCOUNT_CREDENTIAL
-    gcp_credentials_str = json.loads(account)
-    gcp_credentials_json = json.loads(gcp_credentials_str)
+    gcp_credentials_json = json.loads(account)
+    # gcp_credentials_json = json.loads(gcp_credentials_str)
     credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
     client = storage.Client(credentials=credenciales)
 
