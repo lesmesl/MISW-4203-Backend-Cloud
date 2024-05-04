@@ -6,7 +6,7 @@ services:
       - 5672:5672
       - 15672:15672
     env_file:
-      - .env
+      - .env_sample_local
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
@@ -34,7 +34,7 @@ services:
     container_name: 'idrl-db'
     restart: always
     env_file:
-      - .env
+      - .env_sample_local
     ports:
       - "5432:5432"
     volumes:
