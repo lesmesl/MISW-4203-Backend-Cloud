@@ -633,6 +633,9 @@ class RabbitConsumer:
             body (bytes): Cuerpo del mensaje.
         """
 
+        if not os.path.exists("shared/videos-converted"):
+            os.makedirs("shared/videos-converted")
+
         message_consumer = json.loads(body.decode())
         logger.info(f'Mensaje: {message_consumer}')
 
