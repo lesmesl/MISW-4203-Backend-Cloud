@@ -297,6 +297,9 @@ class Task(db.Model):
 @app.route('/api/tasks', methods=['POST'])
 @token_required
 def upload_video(current_user):
+    if not os.path.exists("shared/videos-uploaded"):
+        os.makedirs("shared/videos-uploaded")
+
     if 'video' not in request.files:
         return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
 
