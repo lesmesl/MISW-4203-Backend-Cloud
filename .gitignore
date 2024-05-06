@@ -1,5 +1,6 @@
 .idea
 .venv
+venv
 .env
 # IDE files
 .idea
@@ -10,8 +11,8 @@ __pycache__/
 __pycache__/*.pyc
 
 # Video files
-videos-uploaded/
-videos-converted/
+shared/videos-uploaded/
+shared/videos-converted/
 video_otro_formato.mov
 *.avi
 *.mp4
