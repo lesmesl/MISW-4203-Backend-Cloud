@@ -24,6 +24,8 @@ from constants import (CIPHER_KEY, EXCHANGE_QUEUE, PREFETCH_COUNT,
                        RETRY_DELAY_CONNECTION,
                        RETRY_DELAY_PUBLISH, URI, ROUTING_KEY)
 from flask import send_file
+from google.oauth2 import service_account
+from google.cloud import storage
 
 
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +41,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app_context = app.app_context()
 app_context.push()
+app.config['SQLALCHEMY_POOL_SIZE'] = 30
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 30
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 20
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 10
 db = SQLAlchemy(app)
 # Setting CORS
 CORS(
@@ -137,6 +143,7 @@ def edit_video(input_file, logo, output_file,filename):
 
     except Exception as e:
         logger.error(f"Error al procesar el video: {str(e)}")
+
 
 def token_required(f):
     @wraps(f)
@@ -290,6 +297,9 @@ class Task(db.Model):
 @app.route('/api/tasks', methods=['POST'])
 @token_required
 def upload_video(current_user):
+    if not os.path.exists("shared/videos-uploaded"):
+        os.makedirs("shared/videos-uploaded")
+
     if 'video' not in request.files:
         return jsonify({"error": "no se proporcionó ningún archivo de video"}), 400
 
@@ -301,11 +311,15 @@ def upload_video(current_user):
 
     if video_file and allowed_file(video_file.filename):
         now = datetime.datetime.now()
+        name_time = now.strftime('%Y%m%d%H%M%S%f')
         user_id = current_user.id
-        video_name = f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'
-        video_file.save('videos-uploaded/' + secure_filename(f'{now.strftime("%Y%m%d%H%M%S")}-{user_id}-{video_file.filename}'))
+        video_name = f'{name_time}-{user_id}-{video_file.filename}'
+        video_file.save('shared/videos-uploaded/' + secure_filename(f'{name_time}-{user_id}-{video_file.filename}'))
     else:
         return jsonify({"error": "formato de archivo no permitido"}), 400
+
+    # Upload file to bucket
+    upload_files_buckets(video_name, video_name, 'shared/videos-uploaded/')
 
     video = Video(
         name=video_file.filename,
@@ -334,7 +348,7 @@ def upload_video(current_user):
     publisher.publish_message(
         {
             "file_name": video_file.filename,
-            "file_path": 'videos-uploaded/' + video_name,
+            "file_path": 'shared/videos-uploaded/' + video_name,
             "user_id": current_user.id,
             "task_id": task.id,
             "video_id": video.id
@@ -369,7 +383,7 @@ def get_task(current_user, task_id):
     if video is None:
         return jsonify({"message": "video no encontrado"}), 404
 
-    url = f'http://localhost:5050/videos/{video.path}'
+    url = f'http://{constants.HOST}/videos/{video.path}'
 
     return jsonify({"id": task.id, "name": task.name, "video_id": task.video_id, "status": task.status, "url": url})
 
@@ -389,19 +403,20 @@ def delete_task(current_user, task_id):
 
 @app.route('/videos/<string:video_path>', methods=['GET'])
 def send_video_uploaded(video_path):
-    return send_file(f'videos-converted/procesado_{video_path}')
+    url = get_public_url(f'procesado_{video_path}', 'shared/videos-converted/')
+    return send_file(url)
 
 
 @app.route('/api/videos', methods=['GET'])
 def get_videos():
     videos = Video.query.all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": f'http://localhost:5050/videos/{video.path}', "user_id": video.user_id, "rating": video.rating} for video in videos])
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": f'http://{constants.HOST}/videos/{video.path}', "user_id": video.user_id, "rating": video.rating} for video in videos])
 
 
 @app.route('/api/videos/top', methods=['GET'])
 def get_top_videos():
     videos = db.session.query(Video, User).join(User).order_by(Video.rating.desc()).all()
-    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": f'http://localhost:5050/videos/{video.path}', "user_id": video.user_id, "rating": video.rating, "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
+    return jsonify([{"id": video.id, "name": video.name, "image": video.image, "path": f'http://{constants.HOST}/videos/{video.path}', "user_id": video.user_id, "rating": video.rating, "user": {"id": user.id, "name": user.name, "email": user.email}} for video, user in videos])
 
 
 @app.route('/api/videos/<int:video_id>/vote', methods=['POST'])
@@ -455,9 +470,57 @@ def run_consumer():
             time.sleep(5)  # Espera antes de volver a intentar
 
 
+# Upload files google buckets
+def upload_files_buckets(local_filename, remote_filename, remote_path):
+    account = constants.GCP_ACCOUNT_CREDENTIAL
+    gcp_credentials_json = json.loads(account)
+    # gcp_credentials_json = json.loads(gcp_credentials_str)
+    credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
+    client = storage.Client(credentials=credenciales)
+
+    bucket_id = constants.GCP_BUCKET
+    bucket = client.get_bucket(bucket_id)
+    blob = bucket.blob(remote_path + remote_filename)
+
+    file_path = remote_path + local_filename
+    blob.upload_from_filename(filename=file_path)
+    blob.cache_control = 'public, max-age=31536000'
+    blob.patch()
+
+
+def download_files_buckets(filename):
+    account = constants.GCP_ACCOUNT_CREDENTIAL
+    gcp_credentials_str = json.loads(account)
+    gcp_credentials_json = json.loads(gcp_credentials_str)
+    credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
+    client = storage.Client(credentials=credenciales)
+
+    bucket_id = constants.GCP_BUCKET
+    bucket = client.get_bucket(bucket_id)
+    blob = bucket.blob("shared/videos-uploaded/" + filename)
+
+    blob.download_to_filename("shared/videos-uploaded/")
+
+
+def get_public_url(file_name, file_path):
+    account = constants.GCP_ACCOUNT_CREDENTIAL
+    gcp_credentials_json = json.loads(account)
+    # gcp_credentials_json = json.loads(gcp_credentials_str)
+    credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
+    client = storage.Client(credentials=credenciales)
+
+    bucket_id = constants.GCP_BUCKET
+    bucket = client.get_bucket(bucket_id)
+    blob = bucket.blob(file_path + file_name)
+
+    public_url = blob.public_url
+
+    return public_url
+
 # Inicializar Flask-Migrate
 db.create_all()
 migrate = Migrate(app, db)
+
 
 class RabbitConnection:
     """
@@ -570,6 +633,9 @@ class RabbitConsumer:
             body (bytes): Cuerpo del mensaje.
         """
 
+        if not os.path.exists("shared/videos-converted"):
+            os.makedirs("shared/videos-converted")
+
         message_consumer = json.loads(body.decode())
         logger.info(f'Mensaje: {message_consumer}')
 
@@ -587,24 +653,28 @@ class RabbitConsumer:
                 
                 logger.info("Procesando el video")
  
-                output_dir = "videos-converted"
+                output_dir = "shared/videos-converted"
 
-                file = 'videos-uploaded/'+video.path
                 filename = video.path
+                file = get_public_url(filename, "shared/videos-uploaded/")
+
                 # Nombre del archivo de salida
-                output_filename = f"{output_dir}/procesado_{filename}"
-                logger.info(f"Procesando el video: {output_filename}")
+                output_filename = f"procesado_{filename}"
+                output_filename_dir = f"{output_dir}/procesado_{filename}"
+                logger.info(f"Procesando el video: {output_filename_dir}")
                 
                 # Rutas de los archivos de video, marca de agua y salida
                 video_path = file #"ruta/al/video.mp4"
                 watermark_path = "logo.png"
-                output_path = output_filename #"ruta/de/salida/video_con_marca_de_agua.mp4"
+                output_path = output_filename_dir #"ruta/de/salida/video_con_marca_de_agua.mp4"
 
-                edit_video(video_path, watermark_path, output_path,filename)
+                edit_video(video_path, watermark_path, output_path, filename)
 
                 # Verificar si el archivo de salida existe
                 if os.path.exists(output_path):
                     logger.info("La modificación del video se realizo correctamente.")
+                    # Subir video al bucket
+                    upload_files_buckets(output_filename, output_filename, 'shared/videos-converted/')
                     # Actualizar estado de la tarea
                     task.status = "completado"
                     db.session.commit()
@@ -684,11 +754,14 @@ class RabbitPublisher:
 
 if __name__ == '__main__':
     # crea la cola
-    create_queue_producer()
+    # create_queue_producer()
 
-    # Crear un hilo para el consumidor
-    consumer_thread = threading.Thread(target=run_consumer)
-    consumer_thread.start()
+    if constants.RUN_WORKER == "true":
+        # Crear un hilo para el consumidor
+        consumer_thread = threading.Thread(target=run_consumer)
+        consumer_thread.start()
+        # run_consumer()
 
-    # Iniciar la aplicación Flask en el hilo principal
-    app.run(debug=True, host='0.0.0.0', port=5050)
+    if constants.RUN_SERVER == "true":
+        # Iniciar la aplicación Flask en el hilo principal
+        app.run(debug=True, host='0.0.0.0', port=5050)
