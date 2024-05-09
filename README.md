@@ -130,3 +130,8 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * **Otros**
   * [**Análisis de Caso Práctico: Kluvin Apteekki - Caso de Una Farmacia en Finlandia**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/An%C3%A1lisis-de-Caso-Pr%C3%A1ctico:-Kluvin-Apteeki-%E2%80%90-Caso-de-una-farmacia-en-Finlandia)
+
+
+
+### Service Account
+Es importante crear un archivo de credenciales para la autenticación de la aplicación en GCP. Para ello, se debe crear un archivo JSON con las credenciales de la cuenta de servicio y se debe guardar en la carpeta raíz del proyecto. El archivo debe llamarse `service-account.json`. Para generar esto se deben seguir los siguientes pasos:
