@@ -504,12 +504,12 @@ class Consumer:
 
         # Subscribe to the specified subscription and start receiving messages
         streaming_pull_future = subscriber.subscribe(subscription_path, callback=self.process_message_callback)
-
+        
         print(f"Listening for messages on {subscription_path}...\n")
 
         # Keep the script running to continue receiving messages
         try:
-            streaming_pull_future.result()
+            streaming_pull_future.result(timeout=5)
         except KeyboardInterrupt:
             streaming_pull_future.cancel()
         except Exception as e:
