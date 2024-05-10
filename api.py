@@ -516,13 +516,13 @@ class Consumer:
             logger.error(f"Error al recibir mensajes: {e}")
             streaming_pull_future.cancel() 
 
-    def process_message_callback(self, message_consumer):
+    def process_message_callback(self, message):
         with app.app_context():
             if not os.path.exists("shared/videos-converted"):
                 os.makedirs("shared/videos-converted")
             
             # Decodifica el cuerpo del mensaje
-            message_data = message_consumer.data.decode()
+            message_data = message.data.decode()
             message_consumer = json.loads(message_data)
             logger.info(f'Mensaje: {message_consumer}')
 
@@ -572,7 +572,7 @@ class Consumer:
                         db.session.commit()
                     
                     logger.info(f"Video procesado: {output_filename}")
-                    message_consumer.ack()
+                    message.ack()
                     logger.info("Mensaje confirmado.")
                 else:
                     logger.error("No se pudo encontrar la tarea o el video asociado al mensaje.")
