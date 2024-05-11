@@ -361,7 +361,7 @@ def upload_video(current_user):
 @app.route('/api/tasks')
 @token_required
 def get_tasks(current_user):
-    max_list = request.args.get('max', 10)
+    max_list = request.args.get('max', 2000)
     order = request.args.get('order', 1)
 
     if order == 1:
