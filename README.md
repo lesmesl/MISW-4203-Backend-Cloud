@@ -166,3 +166,8 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * **Otros**
   * [**Documento Arquitectura - Caso De Estudio En La Nube Pública Sin Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Sin-Alta-Disponibilidad)
+
+
+
+### Service Account
+Es importante crear un archivo de credenciales para la autenticación de la aplicación en GCP. Para ello, se debe crear un archivo JSON con las credenciales de la cuenta de servicio y se debe guardar en la carpeta raíz del proyecto. El archivo debe llamarse `service-account.json`. Para generar esto se deben seguir los siguientes pasos:
