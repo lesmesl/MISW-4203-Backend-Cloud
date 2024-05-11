@@ -1,15 +1,13 @@
 import subprocess
 import os
-import threading
 import datetime
 import logging
 import jwt
 import constants
 import json
-import ssl
-import time
-import pika
 import subprocess
+
+from google.cloud import pubsub_v1
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -18,19 +16,17 @@ from flask_migrate import Migrate
 from datetime import timedelta
 from werkzeug.utils import secure_filename
 from functools import wraps
-from constants import (CIPHER_KEY, EXCHANGE_QUEUE, PREFETCH_COUNT,
-                       SSL_CONNECTION, MAX_CONNECTION_RETRIES,
-                       MAX_PUBLISH_RETRIES, QUEUE_PRODUCER,
-                       RETRY_DELAY_CONNECTION,
-                       RETRY_DELAY_PUBLISH, URI, ROUTING_KEY)
 from flask import send_file
 from google.oauth2 import service_account
 from google.cloud import storage
 
+from google.cloud import pubsub_v1
+from google.oauth2 import service_account
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
+
 
 
 app = Flask(__name__)
@@ -160,9 +156,9 @@ def token_required(f):
 
         if token == "null" or token == "undefined" or token == "NaN" or token == "false" or token == "true" or token == "0" or token == "1" or token == "":
             return jsonify({
-                               "message": "token inválido",
-                                "data": None,
-                                "error": "Unauthorized"
+                "message": "token inválido",
+                "data": None,
+                "error": "Unauthorized"
             }), 401
 
         try:
@@ -339,21 +335,25 @@ def upload_video(current_user):
     db.session.add(task)
     db.session.commit()
 
-    # Establecer conexión con RabbitMQ
-    start_channel, start_connection = RabbitConnection.start_connection()
+    # Crea una instancia de PublisherClient con las credenciales especificadas
+    publisher = pubsub_v1.PublisherClient.from_service_account_file('service-account.json')
+    topic_path  = publisher.topic_path(constants.GCP_PROJECT, constants.TOPIC_NAME)
 
-    # publicar mensaje
-    publisher = RabbitPublisher(start_channel, start_connection)
 
-    publisher.publish_message(
-        {
-            "file_name": video_file.filename,
-            "file_path": 'shared/videos-uploaded/' + video_name,
-            "user_id": current_user.id,
-            "task_id": task.id,
-            "video_id": video.id
-        }
-    )
+    # Publica el mensaje en el tópico
+    status_publish = publisher.publish(
+        topic_path, 
+        data=json.dumps(
+            {"file_name": video_file.filename, 
+            "file_path": 'shared/videos-uploaded/' + video_name, 
+            "user_id": current_user.id, 
+            "task_id": task.id, 
+            "video_id": video.id}
+        ).encode("utf-8"))
+
+
+    logger.info(f"Mensaje publicado en el tópico {status_publish.result()}")
+
 
     return jsonify({"message": "tarea de edición creada exitosamente"}), 200
 
@@ -361,7 +361,7 @@ def upload_video(current_user):
 @app.route('/api/tasks')
 @token_required
 def get_tasks(current_user):
-    max_list = request.args.get('max', 10)
+    max_list = request.args.get('max', 2000)
     order = request.args.get('order', 1)
 
     if order == 1:
@@ -433,49 +433,9 @@ def vote_video(video_id):
     return jsonify({"message": "voto registrado exitosamente"}), 200
 
 
-def create_queue_producer():
-    while True:
-        try:
-            parameters = pika.URLParameters(URI)
-            connection = pika.BlockingConnection(parameters)
-            channel = connection.channel()
-            channel.queue_declare(
-                queue=str(QUEUE_PRODUCER),
-                durable=True,
-                arguments={"x-queue-type": "classic"}
-            )
-            time.sleep(3)
-            channel.exchange_declare(exchange=EXCHANGE_QUEUE, durable=True)
-            channel.queue_bind(exchange=EXCHANGE_QUEUE,
-                            queue=QUEUE_PRODUCER, routing_key=ROUTING_KEY)
-            logger.info("Queue creada y asociada al routing_key")
-            break
-    
-        except Exception as error:
-            logger.error(f"Error al crear la cola esperando el servicio de RabbitMQ: {str(error)}")
-            time.sleep(5)
-
-
-def run_consumer():
-    while True:  # Bucle infinito para mantener el consumidor activo
-        try:
-            # Establecer conexión con RabbitMQ
-            start_channel, start_connection = RabbitConnection.start_connection()
-            consumer = RabbitConsumer(start_channel, start_connection)
-            consumer.consume_queue()
-            
-        except Exception as e:
-            logger.error(
-                f"Ocurrió un error durante el consumo de mensajes: {str(e)}")
-            time.sleep(5)  # Espera antes de volver a intentar
-
-
 # Upload files google buckets
 def upload_files_buckets(local_filename, remote_filename, remote_path):
-    account = constants.GCP_ACCOUNT_CREDENTIAL
-    gcp_credentials_json = json.loads(account)
-    # gcp_credentials_json = json.loads(gcp_credentials_str)
-    credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
+    credenciales = service_account.Credentials.from_service_account_file('service-account.json')
     client = storage.Client(credentials=credenciales)
 
     bucket_id = constants.GCP_BUCKET
@@ -489,10 +449,7 @@ def upload_files_buckets(local_filename, remote_filename, remote_path):
 
 
 def download_files_buckets(filename):
-    account = constants.GCP_ACCOUNT_CREDENTIAL
-    gcp_credentials_str = json.loads(account)
-    gcp_credentials_json = json.loads(gcp_credentials_str)
-    credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
+    credenciales = service_account.Credentials.from_service_account_file('service-account.json')
     client = storage.Client(credentials=credenciales)
 
     bucket_id = constants.GCP_BUCKET
@@ -503,10 +460,7 @@ def download_files_buckets(filename):
 
 
 def get_public_url(file_name, file_path):
-    account = constants.GCP_ACCOUNT_CREDENTIAL
-    gcp_credentials_json = json.loads(account)
-    # gcp_credentials_json = json.loads(gcp_credentials_str)
-    credenciales = service_account.Credentials.from_service_account_info(gcp_credentials_json)
+    credenciales = service_account.Credentials.from_service_account_file('service-account.json')
     client = storage.Client(credentials=credenciales)
 
     bucket_id = constants.GCP_BUCKET
@@ -521,69 +475,12 @@ def get_public_url(file_name, file_path):
 db.create_all()
 migrate = Migrate(app, db)
 
-
-class RabbitConnection:
-    """
-    Clase para establecer una conexión con RabbitMQ.
-    """
-
-    @classmethod
-    def start_connection(cls):
-        """
-        Establece la conexión con RabbitMQ y devuelve el canal y la conexión.
-
-        Returns:
-            pika.channel.Channel: Canal de comunicación con RabbitMQ.
-            pika.BlockingConnection: Conexión con RabbitMQ.
-        """
-        retries = 0
-        connected = False
-        connection = None
-        channel = None
-
-        while not connected and retries < MAX_CONNECTION_RETRIES:
-            try:
-                # Configuración de RabbitMQ
-                parameters = pika.URLParameters(URI)
-
-                if SSL_CONNECTION:
-                    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-                    ssl_context.set_ciphers(CIPHER_KEY)
-                    parameters.ssl_options = pika.SSLOptions(context=ssl_context)
-                    logger.info("SSL de RabbitMQ instalado")
-
-                connection = pika.BlockingConnection(parameters)
-                channel = connection.channel()
-                connected = True
-            except (pika.exceptions.ChannelWrongStateError, pika.exceptions.AMQPConnectionError, pika.exceptions.AMQPChannelError):
-                logger.error("Error de conexión RabbitMQ")
-
-            except Exception as error:
-                logger.error(f'Error desconocido {str(error)}')
-
-            if not connected:
-                retries += 1
-                time.sleep(RETRY_DELAY_CONNECTION)
-                logger.warning(
-                    f"realizando reintento de rabbitmq #{retries} de {MAX_CONNECTION_RETRIES}")
-
-        if not connected:
-            logger.error(
-                f"No se pudo establecer conexión con RabbitMQ después de {MAX_CONNECTION_RETRIES} intentos")
-            raise pika.exceptions.AMQPConnectionError(
-                "No se pudo establecer la conexión con RabbitMQ después de varios intentos.")
-
-        return channel, connection
-
-
-class RabbitConsumer:
+class Consumer:
     """
     Clase para consumir mensajes de RabbitMQ.
     """
 
-    def __init__(self, channel, connection):
-        self.channel = channel
-        self.connection = connection
+    def __init__(self):
         # establecer el contexto de la base de datos
         db_uri = f"postgresql://{constants.POSTGRESQL_USER}:{constants.POSTGRESQL_PASSWORD}@{constants.POSTGRESQL_HOST}:{constants.POSTGRESQL_PORT}/{constants.POSTGRESQL_DB}"
         app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
@@ -596,171 +493,111 @@ class RabbitConsumer:
         Consume mensajes de la cola de RabbitMQ y los procesa.
         """
         logger.info('Iniciando el consumo de mensajes...')
+        
+        subscriber = pubsub_v1.SubscriberClient.from_service_account_file('service-account.json')
 
-        while True:
-            try:
 
-                # configuración del consumer
-                self.channel.basic_qos(prefetch_count=PREFETCH_COUNT)
-                self.channel.queue_declare(
-                    QUEUE_PRODUCER, durable=True)
-                # Consumir mensajes de RabbitMQ
-                self.channel.basic_consume(
-                    queue=QUEUE_PRODUCER, on_message_callback=self.process_message_callback)
-                logger.info(
-                    f'Iniciado con éxito el consumo de mensajes de la cola {QUEUE_PRODUCER}...')
-                self.channel.start_consuming()
-            
-            except (pika.exceptions.ChannelWrongStateError, pika.exceptions.AMQPConnectionError, pika.exceptions.AMQPChannelError):
-                logger.error(
-                    'Se perdió la conexión con RabbitMQ. Restableciendo la conexión...')
-                reconnected_channel, reconnected_connection = RabbitConnection.start_connection()
-                self.channel = reconnected_channel
-                self.connection = reconnected_connection
-
-            except Exception as error:
-                logger.error(f"Error al consumir mensajes: {str(error)}")
-                raise Exception(str(error))
-
-    def process_message_callback(self, ch, method, properties, body):
-        """
-        Procesa un mensaje de RabbitMQ.
-
-        Args:
-            ch (pika.channel.Channel): Canal de RabbitMQ.
-            method (pika.spec.Basic.Deliver): Método de RabbitMQ.
-            properties (pika.spec.BasicProperties): Propiedades del mensaje.
-            body (bytes): Cuerpo del mensaje.
+        subscription_path = subscriber.subscription_path(
+            constants.GCP_PROJECT,
+            constants.TOPIC_NAME_SUB
+        )
+        """ 
+            El "lease" es un período de tiempo durante el cual el sistema
+            de mensajería espera que el suscriptor reconozca la recepción del mensaje
         """
 
-        if not os.path.exists("shared/videos-converted"):
-            os.makedirs("shared/videos-converted")
+        # Subscribe to the specified subscription and start receiving messages
+        streaming_pull_future = subscriber.subscribe(
+            subscription_path,
+            callback=self.process_message_callback,
+            flow_control=pubsub_v1.types.FlowControl(max_messages=1),
+        )
+        
+        print(f"Listening for messages on {subscription_path}...\n")
 
-        message_consumer = json.loads(body.decode())
-        logger.info(f'Mensaje: {message_consumer}')
-
+        # Keep the script running to continue receiving messages
         try:
-            task_id = message_consumer["task_id"]
-            video_id = message_consumer["video_id"]
-            logger.info(f"Procesando el mensaje: {task_id}")
-            logger.info(f"Procesando el mensaje: {video_id}")
-            
-            task = Task.query.get(task_id)
-            logger.info(f"Procesando el mensaje: {task}")
-            video = Video.query.get(video_id)
-
-            if task and video:
-                
-                logger.info("Procesando el video")
- 
-                output_dir = "shared/videos-converted"
-
-                filename = video.path
-                file = get_public_url(filename, "shared/videos-uploaded/")
-
-                # Nombre del archivo de salida
-                output_filename = f"procesado_{filename}"
-                output_filename_dir = f"{output_dir}/procesado_{filename}"
-                logger.info(f"Procesando el video: {output_filename_dir}")
-                
-                # Rutas de los archivos de video, marca de agua y salida
-                video_path = file #"ruta/al/video.mp4"
-                watermark_path = "logo.png"
-                output_path = output_filename_dir #"ruta/de/salida/video_con_marca_de_agua.mp4"
-
-                edit_video(video_path, watermark_path, output_path, filename)
-
-                # Verificar si el archivo de salida existe
-                if os.path.exists(output_path):
-                    logger.info("La modificación del video se realizo correctamente.")
-                    # Subir video al bucket
-                    upload_files_buckets(output_filename, output_filename, 'shared/videos-converted/')
-                    # Actualizar estado de la tarea
-                    task.status = "completado"
-                    db.session.commit()
-                else:
-                    logger.error("Hubo un problema al agregar la marca de agua.")
-                    task.status = "problema al agregar la marca de agua"
-                    db.session.commit()
-                
-                logger.info(f"Video procesado: {output_filename}")
-            else:
-                logger.error("No se pudo encontrar la tarea o el video asociado al mensaje.")
-                task.status = "No se pudo encontrar la tarea o el video asociado al mensaje"
-                db.session.commit()
-                
+            streaming_pull_future.result()
+        except KeyboardInterrupt:
+            streaming_pull_future.cancel()
         except Exception as e:
-            logger.error(f"Error al procesar el mensaje: {e}")
-            task.status = "error revisar log"
-            db.session.commit()
+            logger.error(f"Error al recibir mensajes: {e}")
+            streaming_pull_future.cancel() 
 
-        # Verificar el estado del canal antes de realizar la confirmación (ack)
-        if ch.is_open:
-            # Confirmar el procesamiento del mensaje
-            logger.info(f'Se inicia el retiro del mensaje del ack {method.delivery_tag}')
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-        else:
-            logger.warning("El canal de RabbitMQ está cerrado. No se puede realizar la confirmación para publicar (ack).")
+    def process_message_callback(self, message):
+        with app.app_context():
+            if not os.path.exists("shared/videos-converted"):
+                os.makedirs("shared/videos-converted")
+            
+            # Decodifica el cuerpo del mensaje
+            message_data = message.data.decode()
+            message_consumer = json.loads(message_data)
+            logger.info(f'Mensaje: {message_consumer}')
 
 
-class RabbitPublisher:
-    """
-    Clase para publicar mensajes en RabbitMQ.
-    """
-
-    def __init__(self, channel, connection):
-        self.channel = channel
-        self.connection = connection
-
-    def publish_message(self, message):
-        """
-        Publica un mensaje en la cola de RabbitMQ.
-
-        Args:
-            message (dict): Mensaje a publicar.
-        """
-        message_json = json.dumps(message)
-        retries = 0
-        published = False
-
-        while not published and retries < MAX_PUBLISH_RETRIES:
             try:
-                self.channel.basic_publish(
-                    exchange=EXCHANGE_QUEUE, routing_key=ROUTING_KEY, body=message_json)
-                published = True
-                logger.info('Mensaje publicado en RabbitMQ')
-            except (pika.exceptions.ChannelWrongStateError, pika.exceptions.ConnectionClosed, pika.exceptions.StreamLostError) as error_exception:
+                task_id = message_consumer["task_id"]
+                video_id = message_consumer["video_id"]
+                logger.info(f"Procesando el mensaje: {task_id}")
+                logger.info(f"Procesando el mensaje: {video_id}")
+                
+                task = Task.query.get(task_id)
+                logger.info(f"Procesando el mensaje: {task}")
+                video = Video.query.get(video_id)
 
-                logger.error(
-                    f"Error al publicar el mensaje: {str(error_exception)}")
-                time.sleep(RETRY_DELAY_PUBLISH)
+                if task and video:
+                    
+                    logger.info("Procesando el video")
 
-                # Intentar restablecer la conexión con RabbitMQ
-                try:
-                    self.channel, self.connection = RabbitConnection.start_connection()
-                    logger.info(
-                        'Conexión con RabbitMQ recuperada para publicar el mensaje')
+                    output_dir = "shared/videos-converted"
 
-                except Exception as e:
-                    retries += 1
-                    logger.error(
-                        f"Intento de publicar el mensaje de RabbitMQ: #{retries} de {MAX_PUBLISH_RETRIES}")
-                    logger.error(
-                        'No se pudo restablecer la conexión con RabbitMQ')
+                    filename = video.path
+                    file = get_public_url(filename, "shared/videos-uploaded/")
+
+                    # Nombre del archivo de salida
+                    output_filename = f"procesado_{filename}"
+                    output_filename_dir = f"{output_dir}/procesado_{filename}"
+                    logger.info(f"Procesando el video: {output_filename_dir}")
+                    
+                    # Rutas de los archivos de video, marca de agua y salida
+                    video_path = file #"ruta/al/video.mp4"
+                    watermark_path = "logo.png"
+                    output_path = output_filename_dir #"ruta/de/salida/video_con_marca_de_agua.mp4"
+
+                    edit_video(video_path, watermark_path, output_path, filename)
+
+                    # Verificar si el archivo de salida existe
+                    if os.path.exists(output_path):
+                        logger.info("La modificación del video se realizo correctamente.")
+                        # Subir video al bucket
+                        upload_files_buckets(output_filename, output_filename, 'shared/videos-converted/')
+                        # Actualizar estado de la tarea
+                        task.status = "completado"
+                        db.session.commit()
+                    else:
+                        logger.error("Hubo un problema al agregar la marca de agua.")
+                        task.status = "problema al agregar la marca de agua"
+                        db.session.commit()
+                    
+                    logger.info(f"Video procesado: {output_filename}")
+                    message.ack()
+                    logger.info("Mensaje confirmado.")
+                else:
+                    logger.error("No se pudo encontrar la tarea o el video asociado al mensaje.")
+                    task.status = "No se pudo encontrar la tarea o el video asociado al mensaje"
+                    db.session.commit()
+                    
             except Exception as e:
-                logger.error(f"Error al publicar el mensaje: {str(e)}")
-                break
-
+                logger.error(f"Error al procesar el mensaje: {e}")
+                task.status = "error revisar log"
+                db.session.commit()
 
 if __name__ == '__main__':
-    # crea la cola
-    # create_queue_producer()
 
     if constants.RUN_WORKER == "true":
-        # Crear un hilo para el consumidor
-        consumer_thread = threading.Thread(target=run_consumer)
-        consumer_thread.start()
-        # run_consumer()
+
+        consumer = Consumer()
+        consumer.consume_queue()
 
     if constants.RUN_SERVER == "true":
         # Iniciar la aplicación Flask en el hilo principal
