@@ -3,12 +3,13 @@ import os
 import datetime
 import logging
 import jwt
-import constants
 import json
 import subprocess
-
+import pg8000
+import sqlalchemy
+import constants
 from google.cloud import pubsub_v1
-
+from constants import POSTGRESQL_DB, POSTGRESQL_USER, POSTGRESQL_PASSWORD,POSTGRESQL_HOST
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -19,9 +20,11 @@ from functools import wraps
 from flask import send_file
 from google.oauth2 import service_account
 from google.cloud import storage
-
+from sqlalchemy.orm import sessionmaker
 from google.cloud import pubsub_v1
 from google.oauth2 import service_account
+from sqlalchemy import create_engine
+from google.auth import default
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.ERROR)
@@ -29,11 +32,46 @@ logger = logging.getLogger(__name__)
 
 
 
+def connect_unix_socket():
+    """Initializes a Unix socket connection pool for a Cloud SQL instance of Postgres."""
+    db_host = POSTGRESQL_HOST  
+    db_user = POSTGRESQL_USER
+    db_pass = POSTGRESQL_PASSWORD
+    db_name = POSTGRESQL_DB
+    db_port = 5432
+
+    pool = create_engine(
+        # Equivalent URL:
+        # postgresql+pg8000://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
+        sqlalchemy.engine.url.URL.create(
+            drivername="postgresql+pg8000",
+            username=db_user,
+            password=db_pass,
+            host=db_host,
+            port=db_port,
+            database=db_name,
+        ),
+    )
+    return pool
+
+engine = connect_unix_socket()
+
+# clase SessionLocal para manejar las sesiones de base de datos
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 app = Flask(__name__)
 
 # Postgresql connection
-db_uri = f"postgresql://{constants.POSTGRESQL_USER}:{constants.POSTGRESQL_PASSWORD}@{constants.POSTGRESQL_HOST}:{constants.POSTGRESQL_PORT}/{constants.POSTGRESQL_DB}"
-app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_DATABASE_URI'] = get_db()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app_context = app.app_context()
 app_context.push()
@@ -335,8 +373,12 @@ def upload_video(current_user):
     db.session.add(task)
     db.session.commit()
 
+
+    # Obtén las credenciales predeterminadas
+    credentials, project = default(), 
+    logger.info(f'Obteniendo credenciales: {credentials}')
     # Crea una instancia de PublisherClient con las credenciales especificadas
-    publisher = pubsub_v1.PublisherClient.from_service_account_file('service-account.json')
+    publisher = pubsub_v1.PublisherClient(credentials=credentials)
     topic_path  = publisher.topic_path(constants.GCP_PROJECT, constants.TOPIC_NAME)
 
 
@@ -435,8 +477,8 @@ def vote_video(video_id):
 
 # Upload files google buckets
 def upload_files_buckets(local_filename, remote_filename, remote_path):
-    credenciales = service_account.Credentials.from_service_account_file('service-account.json')
-    client = storage.Client(credentials=credenciales)
+    credentials, project = default()
+    client = storage.Client(credentials=credentials)
 
     bucket_id = constants.GCP_BUCKET
     bucket = client.get_bucket(bucket_id)
@@ -449,8 +491,8 @@ def upload_files_buckets(local_filename, remote_filename, remote_path):
 
 
 def download_files_buckets(filename):
-    credenciales = service_account.Credentials.from_service_account_file('service-account.json')
-    client = storage.Client(credentials=credenciales)
+    credentials, project = default()
+    client = storage.Client(credentials=credentials)
 
     bucket_id = constants.GCP_BUCKET
     bucket = client.get_bucket(bucket_id)
@@ -460,8 +502,8 @@ def download_files_buckets(filename):
 
 
 def get_public_url(file_name, file_path):
-    credenciales = service_account.Credentials.from_service_account_file('service-account.json')
-    client = storage.Client(credentials=credenciales)
+    credentials, project = default()
+    client = storage.Client(credentials=credentials)
 
     bucket_id = constants.GCP_BUCKET
     bucket = client.get_bucket(bucket_id)
@@ -482,8 +524,7 @@ class Consumer:
 
     def __init__(self):
         # establecer el contexto de la base de datos
-        db_uri = f"postgresql://{constants.POSTGRESQL_USER}:{constants.POSTGRESQL_PASSWORD}@{constants.POSTGRESQL_HOST}:{constants.POSTGRESQL_PORT}/{constants.POSTGRESQL_DB}"
-        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+        app.config['SQLALCHEMY_DATABASE_URI'] = get_db()
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app_context = app.app_context()
         app_context.push()
@@ -493,8 +534,11 @@ class Consumer:
         Consume mensajes de la cola de RabbitMQ y los procesa.
         """
         logger.info('Iniciando el consumo de mensajes...')
-        
-        subscriber = pubsub_v1.SubscriberClient.from_service_account_file('service-account.json')
+        # Obtén las credenciales predeterminadas
+        credentials, project = default(), 
+        logger.info(f'Obteniendo credenciales: {credentials}')
+        # Crea un cliente de Pub/Sub con las credenciales predeterminadas
+        subscriber = pubsub_v1.SubscriberClient(credentials=credentials)
 
 
         subscription_path = subscriber.subscription_path(
