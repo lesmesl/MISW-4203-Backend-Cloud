@@ -382,7 +382,9 @@ def upload_video(current_user):
 
 
     # Obtén las credenciales predeterminadas
-    credentials, project = default(), 
+    
+    credentials, project = default()
+
     logger.info(f'Obteniendo credenciales: {credentials}')
     # Crea una instancia de PublisherClient con las credenciales especificadas
     publisher = pubsub_v1.PublisherClient(credentials=credentials)
@@ -542,7 +544,9 @@ class Consumer:
         """
         logger.info('Iniciando el consumo de mensajes...')
         # Obtén las credenciales predeterminadas
-        credentials, project = default(), 
+        
+        credentials, project = default()
+
         logger.info(f'Obteniendo credenciales: {credentials}')
         # Crea un cliente de Pub/Sub con las credenciales predeterminadas
         subscriber = pubsub_v1.SubscriberClient(credentials=credentials)

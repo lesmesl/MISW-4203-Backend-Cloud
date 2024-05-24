@@ -281,6 +281,7 @@ gcloud run deploy $WEB_APP_NAME \
     --project $PROJECT_ID \
     --image $REGION-docker.pkg.dev/$PROJECT_ID/$WEB_REPOSITORY_NAME/$WEB_IMAGE  \
     --ingress all \
+    --port $PORT_WEB \
     --region $REGION \
     --platform managed \
     --set-env-vars "POSTGRESQL_DB=$DB_NAME" \
@@ -304,7 +305,6 @@ gcloud run deploy $WEB_APP_NAME \
     --vpc-egress=all-traffic \
     --vpc-connector $VPC_CONNECTOR_NAME \
     --allow-unauthenticated \
-    --use-http2 \
     --min-instances 1 \
     --max-instances 3 \
     --concurrency 120 \

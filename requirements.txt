@@ -16,3 +16,5 @@ google-cloud-storage
 google-cloud-pubsub
 pg8000
 cloud-sql-python-connector[pg8000]
+gunicorn
+uvicorn==0.15.0
