@@ -11,4 +11,9 @@ docker image ls
 
 $ docker push clesmesl/api-image-fpv:latest
 $ docker push clesmesl/worker-image-fpv:latest
-```
+
+# reconstruir la imagen local y volverla a subir
+
+
+``` 
+

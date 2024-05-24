@@ -1,16 +1,19 @@
 #!/bin/bash
 
-PROJECT_ID="betuniandes"
+gcloud services enable sqladmin.googleapis.com
+gcloud services enable sql-component.googleapis.com
+
+PROJECT_ID="uniandes10"
 REGION="us-west1"
 ZONE="us-west1-b"
 ## ===================================================
-DB_INSTANCE_NAME="db-instance-fpv"
+DB_INSTANCE_NAME="idrl-db"
 echo "DB INSTANCE NAME: $DB_INSTANCE_NAME"
 POSTGRES_VERSION="POSTGRES_15"
-DB_PWD="P@ssw0rd"
+DB_PWD="1sw0rd"
 DB_USER="postgres"
 DB_EDITION="enterprise"
-DATABASE_STORAGE_SIZE="20GB"
+DATABASE_STORAGE_SIZE="10GB"
 DB_NAME="idrl"
 # CLOUD STORAGE - TAGS DE CUENTAS DE SERVICIO
 BUCKET_NAME="storage-$PROJECT_ID"
@@ -47,6 +50,7 @@ if [[ $EXISTING_PROJECT == *"NOT_FOUND"* ]]; then
 fi
 
 # CONFIGURAR PROYECTO Y ZONA
+gcloud services enable compute.googleapis.com
 gcloud auth list
 gcloud config list project
 gcloud config set project $PROJECT_ID
@@ -136,6 +140,11 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCK
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/pubsub.admin
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/run.invoker
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/iam.serviceAccountTokenCreator
+gcloud iam roles create custom.storage.admin \
+    --project $PROJECT_ID \
+    --title "Custom Storage Admin" \
+    --description "Custom role for storage administration" \
+    --permissions="storage.buckets.create,storage.buckets.update,storage.buckets.delete,storage.buckets.get,storage.buckets.list,storage.objects.get,storage.objects.list,storage.objects.create,storage.objects.delete,storage.objects.update"
 
 # ## ==================== CREAR RANDO IP PARA LA INSTANCIA ====================
 
@@ -345,10 +354,7 @@ WEB_APP_URL=$(gcloud run services describe $WEB_APP_NAME --region $REGION --form
 WORKER_APP_URL=$(gcloud run services describe $WORKER_APP_NAME --region $REGION --format='value(status.url)')
 #  gcloud run services describe batch-app  --region us-west1 --format='value(status.url)'
 
-## Actualizo la variable de entorno set-env-vars "HOST" tomando el WEB_APP_URL
-gcloud run services update $WEB_APP_NAME --region $REGION --set-env-vars "HOST=$WEB_APP_URL"
-gcloud run services update $WORKER_APP_NAME --region $REGION --set-env-vars "HOST=$WORKER_APP_URL"
-
+## Añadir variables de entorno a web app
 echo "WEB APP URL: $WEB_APP_URL"
 echo "BATCH APP URL: $WORKER_APP_URL"
 

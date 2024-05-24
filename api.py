@@ -1,3 +1,4 @@
+from math import log
 import subprocess
 import os
 import datetime
@@ -5,7 +6,6 @@ import logging
 import jwt
 import json
 import subprocess
-import pg8000
 import sqlalchemy
 import constants
 from google.cloud import pubsub_v1
@@ -30,7 +30,9 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
-
+print(f"POSTGRESQL_DB: {POSTGRESQL_DB}")
+print(f"POSTGRESQL_USER: {POSTGRESQL_USER}")
+print(f"POSTGRESQL_HOST: {POSTGRESQL_HOST}")
 
 def connect_unix_socket():
     """Initializes a Unix socket connection pool for a Cloud SQL instance of Postgres."""
@@ -52,6 +54,9 @@ def connect_unix_socket():
             database=db_name,
         ),
     )
+
+    logger.info(f"Pool de conexión a la base de datos: {pool}")
+
     return pool
 
 engine = connect_unix_socket()
@@ -71,7 +76,9 @@ def get_db():
 app = Flask(__name__)
 
 # Postgresql connection
-app.config['SQLALCHEMY_DATABASE_URI'] = get_db()
+app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_HOST}:5432/{POSTGRESQL_DB}"
+logger.info(f"Conexión: postgresql://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_HOST}:5432/{POSTGRESQL_DB}")
+logger.info(f"Conexión app la base de datos: {app.config['SQLALCHEMY_DATABASE_URI']}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app_context = app.app_context()
 app_context.push()
@@ -524,7 +531,7 @@ class Consumer:
 
     def __init__(self):
         # establecer el contexto de la base de datos
-        app.config['SQLALCHEMY_DATABASE_URI'] = get_db()
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql+pg8000://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_HOST}:5432/{POSTGRESQL_DB}"
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app_context = app.app_context()
         app_context.push()
