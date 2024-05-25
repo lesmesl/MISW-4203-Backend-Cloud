@@ -130,6 +130,42 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * **Otros**
   * [**Análisis de Caso Práctico: Kluvin Apteekki - Caso de Una Farmacia en Finlandia**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/An%C3%A1lisis-de-Caso-Pr%C3%A1ctico:-Kluvin-Apteeki-%E2%80%90-Caso-de-una-farmacia-en-Finlandia)
+ 
+
+## Semanas 4-5: Entrega 3 - Diseño e Implementación de una Aplicación Web Escalable en la Nube Pública – Escalabilidad en la Capa Web
+
+### Actividades Previas - Backend:
+* **Aplicación web con funcionalidades básicas implementadas**
+  * **Backend REST desarrollado para la aplicación**.
+    * [**Pagina WIKI Entrega 1: Backend REST + Procesamiento Asíncrono**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Backend-REST---Procesamiento-As%C3%ADncrono)
+    * [**Código API.py Inicial**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/blob/main/api.py)
+    * [**Página WIKI Entrega 1: Documentación en Postman**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentaci%C3%B3n-en-Postman-de-la-API-REST)
+
+
+
+### **Entregables Semana 4-5 - Entrega 3**:
+* **Despliegue de la aplicación con escalabilidad en la capa web**
+  * **Actividades requeridas para Despliegue de la Aplicación con escalabilidad en la capa web**
+    * [**Pagina de la wiki Entrega 3: Escalabilidad en la Capa Web - Diseño e Implementación de una Aplicación Web Escalable en Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-3:-Escalabilidad-en-la-Capa-Web-%E2%80%90-Dise%C3%B1o-e-Implementaci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-Escalabre-en-Nube-P%C3%BAblica)
+    * [**Release API Entrega 3**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v3.0) 
+    * [**Workspace de Colecciones Postman: IDRL API**](https://www.postman.com/speeding-sunset-217733/workspace/public-idrl-api-uniandes/collection/5831053-9e42e5ab-53d2-4fc6-9081-d4d3a481e191) 
+    * [**Video Entrega 3 - Sustentación - Aplicación Escalable en GCP**](https://www.youtube.com/watch?v=-Xvuzik59Ms&ab_channel=LesmesWeb)
+      
+* **Arquitectura de la Aplicación**
+    * [**Página Wiki Entrega 3- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-3:-Arquitectura-de-la-Aplicaci%C3%B3n:-International-FPV-Drone-Racing-League-(IDRL))
+    * [**Video Entrega 3 - Arquitectura de la Aplicación**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EWjA7jGgEo5JkeWVB-r--5IBsmiTgNZ1CCwof8_22-d5sA?e=OHEwlj)
+
+* **Análisis de Capacidad**
+  * **Ejecución pruebas de estrés sobre el modelo de despliegue Semana 3**
+     * [**Pagina Wiki Entrega 3 - Análisis de Capacidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-3:-An%C3%A1lisis-de-Capacidad)
+     * [**Video de Escenario 1- Entrega 3**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EaPesB9r-btIoGh5TINIyEYBYoqD-uOyKetB8HUU_7dlxg?e=PS1b3N) 
+     * [**Video de Escenario 2- Entrega 3**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EUR_6MJ2JI5MhUG23Rj8eOwBBxr4yB5-V2VzB-npi3vx2w?e=gk70sn)
+   
+* [**Manual de Despliegue de la aplicación con escalabilidad en la capa web**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Despliegue-%E2%80%90-Escalabilidad-en-la-Capa-Web)
+
+
+* **Otros**
+  * [**Documento Arquitectura - Caso De Estudio En La Nube Pública Sin Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Sin-Alta-Disponibilidad)
 
 
 
