@@ -166,6 +166,44 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * **Otros**
   * [**Documento Arquitectura - Caso De Estudio En La Nube Pública Sin Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Sin-Alta-Disponibilidad)
+ 
+## Semana 6: Entrega 4 - Diseño e Implementación de una Aplicación Web Escalable en la Nube Pública – Escalabilidad en el Backend
+
+### Actividades Previas - Entregas 1 y 3:
+* **Aplicación web con funcionalidades básicas implementadas**
+  * **Backend REST desarrollado para la aplicación**.
+    * [**Pagina WIKI Entrega 1: Backend REST + Procesamiento Asíncrono**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Backend-REST---Procesamiento-As%C3%ADncrono)
+    * [**Código API.py Inicial**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/blob/main/api.py)
+    * [**Página WIKI Entrega 1: Documentación en Postman**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentaci%C3%B3n-en-Postman-de-la-API-REST)
+    * [**Pagina de la wiki Entrega 3: Escalabilidad en la Capa Web - Diseño e Implementación de una Aplicación Web Escalable en Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-3:-Escalabilidad-en-la-Capa-Web-%E2%80%90-Dise%C3%B1o-e-Implementaci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-Escalabre-en-Nube-P%C3%BAblica)
+    * [**Release API Entrega 3**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v3.0) 
+
+
+### **Entregables Semana 6 - Entrega 4**:
+* **Modelo de Despliegue de la aplicación con Escalabilidad en Backend**
+  * **Actividades requeridas para Despliegue de la Aplicación con escalabilidad en Backend**
+    * [**Pagina de la wiki Entrega 4: Escalabilidad en el Backend ‐ Diseño e Implementación de una Aplicación Web Escalable en la Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-Escalabilidad-en-el-Backend-%E2%80%90-Dise%C3%B1o-e-Implementaci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-Escalable-en-la-Nube-P%C3%BAblica)
+    * [**Release API Entrega 4**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v4.0) 
+    * [**Workspace de Colecciones Postman: IDRL API**](https://www.postman.com/speeding-sunset-217733/workspace/public-idrl-api-uniandes/collection/5831053-9e42e5ab-53d2-4fc6-9081-d4d3a481e191)
+    * [**Documento PDF Manual Despliegue Entrega 4 - Escalabilidad Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/files/15287833/Documento.de.manual.de.despliegue.pub.sub.pdf) 
+    * [**Video Entrega 4 - Sustentación - Aplicación Escalabilidad del Backend en GCP**](https://www.loom.com/share/21bed97fa4bd46bf8f4097e307505747)
+      
+* **Arquitectura de la Aplicación**
+    * [**Página Wiki Entrega 4- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-Arquitectura-de-la-Aplicaci%C3%B3n:-International-FPV-Drone-Racing-League-(IDRL))
+    * [**Diagrama de Despliegue de Aplicacion GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/assets/142732610/245f2c6c-3bb5-4149-be82-ed8de4cdbe6f)
+    * [**Video Entrega 4 - Arquitectura de la Aplicación**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EVmEeCKRlv5Pi0TYBabZ7tYBVAl3yDI5p_HGdWi9Z2xuxQ?e=ozxHwc)
+
+* **Análisis de Capacidad**
+  * **Ejecución pruebas de estrés sobre el modelo de despliegue Semana 6**
+     * [**Pagina Wiki Entrega 4 - Análisis de Capacidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-An%C3%A1lisis-de-Capacidad-%E2%80%90-Escalabilidad-en-el-Backend-Dise%C3%B1o-e-Implementaci%C3%B3n-de-Una-Aplicaci%C3%B3n-Web-Escalable-en-la-Nube-P%C3%BAblica)
+     * [**Sustentación Análisis Capacidad Carga Videos Parte 1 - Entrega 4**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EfO3KAqFZB9KuwdnBx0XNKwBlMcj0RLPwjHr4Birxz4MeQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=ixZAxd)
+    * [**Sustentación Análisis Capacidad Carga Videos Parte 2 - Entrega 4**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/ERaiiTirk0BMsLoT5Q_f_jkByd6NYkNR1KA6AmzdXmfA6Q?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=gSir7c)
+    * [**Sustentación Análisis Capacidad Carga Videos Parte 3 - Entrega 4**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EYZ1f2PteedHp2krJeCvAzQBR-zccGvViWyAVuvqYfH57w?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=7DhVQr) 
+
+* [**Manual de Despliegue de la aplicación con escalabilidad en Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Configuraci%C3%B3n-y-Despliegue-en-GCP-%E2%80%90-Escalabilidad-Backend-%E2%80%90-International-FPV-Drone-Racing-League-(IDRL))
+
+* **Otros**
+  * [**Documento Arquitectura - Caso De Estudio En La Nube Pública COn Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Con-Alta-Disponibilidad)
 
 
 

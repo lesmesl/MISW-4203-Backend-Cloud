@@ -1,2 +1,5 @@
 .venv/
 .git
+.env
+envs
+deploy.sh

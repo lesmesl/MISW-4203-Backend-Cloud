@@ -13,5 +13,7 @@ COPY . .
 # Otorgar permisos de lectura y escritura a todos los archivos y directorios
 RUN chmod -R 777 /app
 
+EXPOSE 8080
+
 # Iniciar la aplicación
 CMD ["python", "api.py"]
