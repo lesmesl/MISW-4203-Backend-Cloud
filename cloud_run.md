@@ -26,9 +26,11 @@ docker system prune -a -f
 
 docker image ls
 
+docker build -t clesmesl/api-image-fpv:latest -f Dockerfile-api .
+docker build -t clesmesl/worker-image-fpv:latest -f Dockerfile-worker .
 docker push clesmesl/api-image-fpv:latest
 docker push clesmesl/worker-image-fpv:latest
-
+echo "done"
 # reconstruir la imagen local y volverla a subir
 
 

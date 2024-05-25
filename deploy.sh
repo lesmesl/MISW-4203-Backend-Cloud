@@ -23,7 +23,7 @@ BUCKET_SA_NAME="storage-admin-sa"
 BUCKET_SA_EMAIL="$BUCKET_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 # PUBSUB
 TOPIC_NAME="topic_video_processor"
-TOPIC_NAME_SUBSCRIPTION="$TOPIC_NAME-subscription"
+SUBSCRIPTION_NAME="$TOPIC_NAME-sub"
 FAIL_TOPIC_NAME="$TOPIC_NAME-fail-topic"
 ## REPOSITORIO DE ARTIFACTOS
 WEB_REPOSITORY_NAME="api-repository"
@@ -80,9 +80,6 @@ gsutil iam ch allUsers:objectViewer gs://$BUCKET_NAME
 # HABILITAR API DE PUBSUB
 gcloud services enable pubsub.googleapis.com
 
-# # CREAR TOPIC
-# gcloud pubsub topics create misw-4204-cloud-topic-fpv-task
-gcloud pubsub topics create $TOPIC_NAME
 
 # # CREAR DEAD LETTER TOPIC
 # gcloud pubsub topics create misw-4204-cloud-topic-fpv-task-dead-letter
@@ -97,7 +94,7 @@ gcloud pubsub topics list
 
 # #GET SUBSCRIPTION MESSAGES
 # gcloud pubsub subscriptions pull misw-4204-cloud-topic-fpv-task-subscription --auto-ack
-#gcloud pubsub subscriptions pull $TOPIC_NAME_SUBSCRIPTION --auto-ack
+#gcloud pubsub subscriptions pull $SUBSCRIPTION_NAME --auto-ack
 
 # ## ==================== CUENTA DE SERVICIO ====================
 
@@ -148,6 +145,14 @@ gcloud iam roles create custom.storage.admin \
 
 # ## ==================== CREAR RANDO IP PARA LA INSTANCIA ====================
 
+# # CREAR TOPIC
+# gcloud pubsub topics create misw-4204-cloud-topic-fpv-task
+gcloud pubsub topics create $TOPIC_NAME
+gcloud pubsub subscriptions create $SUBSCRIPTION_NAME \
+    --topic $TOPIC_NAME \
+    --project $PROJECT_ID \
+    --push-auth-service-account=$BUCKET_SA_EMAIL
+    
 
 gcloud compute addresses create $VPC_PEERING_NAME \
     --global \
@@ -293,9 +298,9 @@ gcloud run deploy $WEB_APP_NAME \
     --set-env-vars "RUN_WORKER=false" \
     --set-env-vars "GCP_BUCKET=$BUCKET_NAME" \
     --set-env-vars "HOST=127.0.0.1" \
-    --set-env-vars "GCP_PROJECT=betuniandes" \
+    --set-env-vars "GCP_PROJECT=uniandes10" \
     --set-env-vars "TOPIC_NAME=$TOPIC_NAME" \
-    --set-env-vars "TOPIC_NAME_SUB=$TOPIC_NAME_SUBSCRIPTION" \
+    --set-env-vars "TOPIC_NAME_SUB=$SUBSCRIPTION_NAME" \
     --service-account $BUCKET_SA_EMAIL \
     --tag http-web-server \
     --description "Servicios api rest - capa web" \
@@ -327,9 +332,9 @@ gcloud run deploy $WORKER_APP_NAME \
     --set-env-vars "RUN_WORKER=true" \
     --set-env-vars "GCP_BUCKET=$BUCKET_NAME" \
     --set-env-vars "HOST=127.0.0.1" \
-    --set-env-vars "GCP_PROJECT=betuniandes" \
+    --set-env-vars "GCP_PROJECT=uniandes10" \
     --set-env-vars "TOPIC_NAME=$TOPIC_NAME" \
-    --set-env-vars "TOPIC_NAME_SUB=$TOPIC_NAME_SUBSCRIPTION" \
+    --set-env-vars "TOPIC_NAME_SUB=$SUBSCRIPTION_NAME" \
     --service-account $BUCKET_SA_EMAIL \
     --tag http-batch-server \
     --description "Servicio de procesamiento de tareas en segundo plano - capa batch" \
@@ -360,15 +365,3 @@ echo "BATCH APP URL: $WORKER_APP_URL"
 
 ## ====================== CREAR SUSCRIPCION ===================
 
-# # CREATE SUBSCRIPTION
-# gcloud pubsub subscriptions create misw-4204-cloud-topic-fpv-task-subscription --topic misw-4204-cloud-topic-fpv-task  --max-delivery-attempts 5 --dead-letter-topic misw-4204-cloud-topic-fpv-task-dead-letter
-gcloud pubsub subscriptions create $TOPIC_NAME_SUBSCRIPTION \
-    --topic $TOPIC_NAME \
-    --ack-deadline 600 \
-    --max-delivery-attempts 5 \
-    --push-endpoint $WORKER_APP_URL \
-    --push-auth-service-account $BUCKET_SA_EMAIL \
-    --dead-letter-topic $FAIL_TOPIC_NAME
-
-# # GET ALL SUBSCRIPTIONS LIST
-gcloud pubsub subscriptions list

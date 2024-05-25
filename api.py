@@ -1,4 +1,5 @@
 from math import log
+import threading
 import subprocess
 import os
 import datetime
@@ -650,9 +651,13 @@ class Consumer:
 if __name__ == '__main__':
 
     if constants.RUN_WORKER == "true":
-
+        logger.info("Iniciando el consumidor en un hilo separado...")
         consumer = Consumer()
-        consumer.consume_queue()
+        worker_thread = threading.Thread(target=consumer.consume_queue())
+        logger.info("Iniciando el consumidor en un hilo separado 2...")
+        worker_thread.start()
+        logger.info("Iniciando el app")
+        app.run(debug=True, host='0.0.0.0', port=8080)
 
     if constants.RUN_SERVER == "true":
         # Iniciar la aplicación Flask en el hilo principal
