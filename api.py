@@ -1,4 +1,3 @@
-from math import log
 import threading
 import subprocess
 import os
@@ -19,11 +18,9 @@ from datetime import timedelta
 from werkzeug.utils import secure_filename
 from functools import wraps
 from flask import send_file
-from google.oauth2 import service_account
 from google.cloud import storage
 from sqlalchemy.orm import sessionmaker
 from google.cloud import pubsub_v1
-from google.oauth2 import service_account
 from sqlalchemy import create_engine
 from google.auth import default
 
@@ -654,17 +651,22 @@ class Consumer:
                 task.status = "error revisar log"
                 db.session.commit()
 
+@app.route('/consumer', methods=['GET'])
+def start_consumer():
+    logger.info("Iniciando el consumidor en un hilo separado...")
+    consumer = Consumer()
+    worker_thread = threading.Thread(target=consumer.consume_queue())
+    logger.info("Iniciando el consumidor en un hilo separado 2...")
+    worker_thread.start()
+    logger.info("Iniciando el consumidor en un hilo separado 1...")
+
+
 if __name__ == '__main__':
 
     if constants.RUN_WORKER == "true":
-        logger.info("Iniciando el consumidor en un hilo separado...")
-        consumer = Consumer()
-        worker_thread = threading.Thread(target=consumer.consume_queue())
-        logger.info("Iniciando el consumidor en un hilo separado 2...")
-        worker_thread.start()
-        logger.info("Iniciando el app")
         app.run(debug=True, host='0.0.0.0', port=8080)
 
     if constants.RUN_SERVER == "true":
         # Iniciar la aplicación Flask en el hilo principal
         app.run(debug=True, host='0.0.0.0', port=5050)
+

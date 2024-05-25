@@ -1,44 +1,42 @@
 #!/bin/bash
 
 gcloud services enable sqladmin.googleapis.com
-gcloud services enable sql-component.googleapis.com
+gcloud services enable servicenetworking.googleapis.com compute.googleapis.com vpcaccess.googleapis.com
 
 PROJECT_ID="uniandes10"
 REGION="us-west1"
 ZONE="us-west1-b"
-## ===================================================
 DB_INSTANCE_NAME="idrl-db"
-echo "DB INSTANCE NAME: $DB_INSTANCE_NAME"
 POSTGRES_VERSION="POSTGRES_15"
 DB_PWD="1sw0rd"
 DB_USER="postgres"
 DB_EDITION="enterprise"
 DATABASE_STORAGE_SIZE="10GB"
 DB_NAME="idrl"
-# CLOUD STORAGE - TAGS DE CUENTAS DE SERVICIO
+# CLOUD STORAGE
 BUCKET_NAME="storage-$PROJECT_ID"
 BUCKET_ROLE_ID="custom.storage.admin"
 BUCKET_ROLE_TITLE="Custom Storage Admin"
 BUCKET_SA_NAME="storage-admin-sa"
 BUCKET_SA_EMAIL="$BUCKET_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-# PUBSUB
+# PUB/SUB
 TOPIC_NAME="topic_video_processor"
 SUBSCRIPTION_NAME="$TOPIC_NAME-sub"
 FAIL_TOPIC_NAME="$TOPIC_NAME-fail-topic"
-## REPOSITORIO DE ARTIFACTOS
+## Artefactos y repositorios
 WEB_REPOSITORY_NAME="api-repository"
 WORKER_REPOSITORY_NAME="worker-repository"
-## IMAGENES DOCKER
+## Imagenes API y Worker
 WEB_IMAGE="api-image-fpv:latest"
 WORKER_IMAGE="worker-image-fpv:latest"
 DOCKER_WEB_IMAGE="clesmesl/$WEB_IMAGE"
 DOCKER_WORKER_IMAGE="clesmesl/$WORKER_IMAGE"
-## CLOUD RUN APSS
+## Name CLOUD RUN APPS
 WEB_APP_NAME="web-app"
 WORKER_APP_NAME="worker-app"
 PORT_WEB="5050"
 PORT_WORKER="8080"
-## VPC PEERING
+## VPC NAME
 VPC_PEERING_NAME="google-managed-services-default"
 VPC_CONNECTOR_NAME="fpv-connector"
 
@@ -55,14 +53,10 @@ gcloud auth list
 gcloud config list project
 gcloud config set project $PROJECT_ID
 gcloud config set core/project $PROJECT_ID
-#gcloud compute project-info describe --project $(gcloud config get-value project)
 gcloud config set compute/region $REGION
 gcloud config set compute/zone $ZONE
 echo -e "PROJECT ID: $PROJECT_ID\nZONE: $ZONE"
 
-## ==================== HABILITAR EL API DE VPC ====================
-
-gcloud services enable servicenetworking.googleapis.com compute.googleapis.com vpcaccess.googleapis.com
 
 ## ==================== CLOUD STORAGE ====================
 
@@ -82,19 +76,10 @@ gcloud services enable pubsub.googleapis.com
 
 
 # # CREAR DEAD LETTER TOPIC
-# gcloud pubsub topics create misw-4204-cloud-topic-fpv-task-dead-letter
 gcloud pubsub topics create $FAIL_TOPIC_NAME
 
 # # GET ALL TOPICS LIST
 gcloud pubsub topics list
-
-# # PUBLISH MESSAGE
-# gcloud pubsub topics publish misw-4204-cloud-topic-fpv-task --message "Hello, World!" 
-# gcloud pubsub topics publish $TOPIC_NAME --message "Hello, World!"
-
-# #GET SUBSCRIPTION MESSAGES
-# gcloud pubsub subscriptions pull misw-4204-cloud-topic-fpv-task-subscription --auto-ack
-#gcloud pubsub subscriptions pull $SUBSCRIPTION_NAME --auto-ack
 
 # ## ==================== CUENTA DE SERVICIO ====================
 
@@ -129,31 +114,52 @@ gcloud iam service-accounts create $BUCKET_SA_NAME \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$BUCKET_SA_EMAIL \
     --role=projects/$PROJECT_ID/roles/$BUCKET_ROLE_ID
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/cloudsql.client
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/storage.objectViewer
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/storage.admin
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/logging.admin
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/cloudsql.editor
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/pubsub.admin
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/run.invoker
-gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$BUCKET_SA_EMAIL --role=roles/iam.serviceAccountTokenCreator
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/cloudsql.client 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/storage.objectViewer 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/storage.admin 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/logging.admin 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/cloudsql.editor 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/pubsub.admin 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/run.invoker 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member=serviceAccount:$BUCKET_SA_EMAIL \
+    --role=roles/iam.serviceAccountTokenCreator
+
 gcloud iam roles create custom.storage.admin \
     --project $PROJECT_ID \
     --title "Custom Storage Admin" \
     --description "Custom role for storage administration" \
     --permissions="storage.buckets.create,storage.buckets.update,storage.buckets.delete,storage.buckets.get,storage.buckets.list,storage.objects.get,storage.objects.list,storage.objects.create,storage.objects.delete,storage.objects.update"
 
-# ## ==================== CREAR RANDO IP PARA LA INSTANCIA ====================
-
 # # CREAR TOPIC
-# gcloud pubsub topics create misw-4204-cloud-topic-fpv-task
 gcloud pubsub topics create $TOPIC_NAME
 gcloud pubsub subscriptions create $SUBSCRIPTION_NAME \
     --topic $TOPIC_NAME \
     --project $PROJECT_ID \
     --push-auth-service-account=$BUCKET_SA_EMAIL
     
-
 gcloud compute addresses create $VPC_PEERING_NAME \
     --global \
     --purpose=VPC_PEERING \
@@ -198,8 +204,6 @@ gcloud sql instances create $DB_INSTANCE_NAME \
 DB_PRIVATE_IP=$(gcloud sql instances describe $DB_INSTANCE_NAME --format="value(ipAddresses.ipAddress)")
 echo "Private IP of Cloud SQL instance: $DB_PRIVATE_IP"
 
-# ## ==================== BASE DE DATOS ====================
-
 # CREAR BASE DE DATOS
 gcloud sql databases create $DB_NAME \
     --instance $DB_INSTANCE_NAME
@@ -217,15 +221,9 @@ echo "DB CONNECTION URL: $DB_CONNECTION_URL"
 CONECTION_NAME=$(gcloud sql instances describe $DB_INSTANCE_NAME --format='value(connectionName)')
 echo "CONNECTION NAME: $CONECTION_NAME"
 
-# # HACER PRUEBA DE CONEXION DE BASE DE DATOS DESDE LA INSTANCIA POR SSH
-# # sudo apt-get install postgresql-client -y
-# # psql --host=35.197.11.11 --port=5432 --username=postgres --password --dbname=db-test
-
-## ======================  HABILITAR SERVICIO DE ARTIFACT ===================
+## ======================  CREAR REPOSITORIO ===================
 
 gcloud services enable artifactregistry.googleapis.com  run.googleapis.com
-
-## ======================  CREAR REPOSITORIO ===================
 
 gcloud artifacts repositories create $WEB_REPOSITORY_NAME \
     --project $PROJECT_ID \
@@ -264,23 +262,11 @@ gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
 ## ======================  SUBIR LA IMAGEN ===================
 
 docker push $REGION-docker.pkg.dev/$PROJECT_ID/$WEB_REPOSITORY_NAME/$WEB_IMAGE
-
 docker push $REGION-docker.pkg.dev/$PROJECT_ID/$WORKER_REPOSITORY_NAME/$WORKER_IMAGE
-# docker push us-west1-docker.pkg.dev/misw-4204-cloud/fpv-batch-repository/worker-fpv:6.0.5
 
 ## ======================  CLOUD RUN ===================
-
-# https://cloud.google.com/sql/docs/postgres/connect-connectors#python
-# https://cloud.google.com/sql/docs/postgres/connect-run#public-ip-default_1
-
 echo "connectionName: $CONECTION_NAME"
 INSTANCE_UNIX_SOCKET="/cloudsql/$CONECTION_NAME"
-# echo "INSTANCE UNIX SOCKET: $INSTANCE_UNIX_SOCKET"
-# echo "Instance db user: $DB_USER"
-# echo "Instance db password: $DB_PWD"
-# echo "Instance db name: $DB_NAME"
-# Limites de servicio
-# https://cloud.google.com/run/quotas#cloud_run_limits
 
 gcloud run deploy $WEB_APP_NAME \
     --project $PROJECT_ID \
@@ -347,21 +333,16 @@ gcloud run deploy $WORKER_APP_NAME \
     --vpc-connector $VPC_CONNECTOR_NAME \
     --allow-unauthenticated
 
-
-## ======================  DESCRIBIR EL SERVICIO ===================
-
-# gcloud run services describe $WEB_APP_NAME --region $REGION
-# gcloud run services describe $WORKER_APP_NAME --region $REGION
-
-## ======================  OBTENER LA IP DEL SERVICIO ===================
+## ======================  OBTENER LA IP PARA AÑADIRLO A LA SUSCRIPCIÓN ===================
 
 WEB_APP_URL=$(gcloud run services describe $WEB_APP_NAME --region $REGION --format='value(status.url)')
 WORKER_APP_URL=$(gcloud run services describe $WORKER_APP_NAME --region $REGION --format='value(status.url)')
-#  gcloud run services describe batch-app  --region us-west1 --format='value(status.url)'
 
-## Añadir variables de entorno a web app
 echo "WEB APP URL: $WEB_APP_URL"
 echo "BATCH APP URL: $WORKER_APP_URL"
 
-## ====================== CREAR SUSCRIPCION ===================
-
+gcloud pubsub subscriptions create $SUBSCRIPTION_NAME \
+    --topic $TOPIC_NAME \
+    --push-endpoint $WORKER_APP_URL \
+    --push-auth-service-account $BUCKET_SA_EMAIL \
+    --dead-letter-topic $FAIL_TOPIC_NAME
