@@ -183,11 +183,10 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 * **Modelo de Despliegue de la aplicación con Escalabilidad en Backend**
   * **Actividades requeridas para Despliegue de la Aplicación con escalabilidad en Backend**
     * [**Pagina de la wiki Entrega 4: Escalabilidad en el Backend ‐ Diseño e Implementación de una Aplicación Web Escalable en la Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-Escalabilidad-en-el-Backend-%E2%80%90-Dise%C3%B1o-e-Implementaci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-Escalable-en-la-Nube-P%C3%BAblica)
-    * [**Release API Entrega 4**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v4.0) 
+    * [**Release API Entrega 4**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v5.0)
     * [**Workspace de Colecciones Postman: IDRL API**](https://www.postman.com/speeding-sunset-217733/workspace/public-idrl-api-uniandes/collection/5831053-9e42e5ab-53d2-4fc6-9081-d4d3a481e191)
-    * [**Documento PDF Manual Despliegue Entrega 4 - Escalabilidad Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/files/15287833/Documento.de.manual.de.despliegue.pub.sub.pdf) 
+    * [**Documento PDF Manual Despliegue Entrega 4 - Escalabilidad Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/files/15444574/Manual.de.despliegue.semana.8.pdf)
     * [**Video Entrega 4 - Sustentación - Aplicación Escalabilidad del Backend en GCP**](https://www.loom.com/share/21bed97fa4bd46bf8f4097e307505747)
-      
 * **Arquitectura de la Aplicación**
     * [**Página Wiki Entrega 4- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-Arquitectura-de-la-Aplicaci%C3%B3n:-International-FPV-Drone-Racing-League-(IDRL))
     * [**Diagrama de Despliegue de Aplicacion GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/assets/142732610/245f2c6c-3bb5-4149-be82-ed8de4cdbe6f)
@@ -205,7 +204,3 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 * **Otros**
   * [**Documento Arquitectura - Caso De Estudio En La Nube Pública COn Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Con-Alta-Disponibilidad)
 
-
-
-### Service Account
-Es importante crear un archivo de credenciales para la autenticación de la aplicación en GCP. Para ello, se debe crear un archivo JSON con las credenciales de la cuenta de servicio y se debe guardar en la carpeta raíz del proyecto. El archivo debe llamarse `service-account.json`. Para generar esto se deben seguir los siguientes pasos:
