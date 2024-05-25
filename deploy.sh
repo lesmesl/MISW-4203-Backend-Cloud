@@ -32,7 +32,7 @@ WORKER_REPOSITORY_NAME="worker-repository"
 WEB_IMAGE="api-image-fpv:latest"
 WORKER_IMAGE="worker-image-fpv:latest"
 DOCKER_WEB_IMAGE="clesmesl/$WEB_IMAGE"
-DOCKER_WORKER_IMAGE=$DOCKER_WEB_IMAGE
+DOCKER_WORKER_IMAGE="clesmesl/$WORKER_IMAGE"
 ## CLOUD RUN APSS
 WEB_APP_NAME="web-app"
 WORKER_APP_NAME="worker-app"
@@ -245,8 +245,8 @@ echo "Creado el repositorio de artefacto para la aplicacion worker $WORKER_REPOS
 
 
 ## ======================  DESCARGAR LAS IMAGENES DE DOCKER ===================
-echo "Descargando imagen de la aplicacion $DOCKER_WEB_IMAGE"
 docker pull $DOCKER_WEB_IMAGE
+docker pull $DOCKER_WORKER_IMAGE
 echo "Imagen de la aplicacion web/worker descargada"
 
 ## ======================  ETIQUETAR LA IMAGEN ===================

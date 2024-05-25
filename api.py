@@ -550,32 +550,38 @@ class Consumer:
 
         logger.info(f'Obteniendo credenciales: {credentials}')
         # Crea un cliente de Pub/Sub con las credenciales predeterminadas
-        subscriber = pubsub_v1.SubscriberClient(credentials=credentials)
 
+        try:
+            subscriber = pubsub_v1.SubscriberClient(credentials=credentials)
+            
+            logger.info(f"Obteniendo el constants.GCP_PROJECT: {constants.GCP_PROJECT}")
+            logger.info(f"Obteniendo el constants.TOPIC_NAME_SUB: {constants.TOPIC_NAME_SUB}")
 
-        subscription_path = subscriber.subscription_path(
-            constants.GCP_PROJECT,
-            constants.TOPIC_NAME_SUB
-        )
+            subscription_path = subscriber.subscription_path(
+                constants.GCP_PROJECT,
+                constants.TOPIC_NAME_SUB
+            )
+        except Exception as e:
+            logger.error(f"Error al obtener el cliente de Pub/Sub: {e}")
+
         """ 
             El "lease" es un período de tiempo durante el cual el sistema
             de mensajería espera que el suscriptor reconozca la recepción del mensaje
         """
-
-        # Subscribe to the specified subscription and start receiving messages
-        streaming_pull_future = subscriber.subscribe(
-            subscription_path,
-            callback=self.process_message_callback,
-            flow_control=pubsub_v1.types.FlowControl(max_messages=1),
-        )
-        
-        print(f"Listening for messages on {subscription_path}...\n")
-
-        # Keep the script running to continue receiving messages
         try:
+            print(f"Escuchando mensajes en {subscription_path}...\n")
+            # Subscribe to the specified subscription and start receiving messages
+            streaming_pull_future = subscriber.subscribe(
+                subscription_path,
+                callback=self.process_message_callback,
+                flow_control=pubsub_v1.types.FlowControl(max_messages=1),
+            )
+            
+            print(f"Listening for messages on {subscription_path}...\n")
+
+            # Keep the script running to continue receiving messages
             streaming_pull_future.result()
-        except KeyboardInterrupt:
-            streaming_pull_future.cancel()
+    
         except Exception as e:
             logger.error(f"Error al recibir mensajes: {e}")
             streaming_pull_future.cancel() 
