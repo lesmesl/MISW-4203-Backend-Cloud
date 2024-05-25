@@ -188,7 +188,7 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
     * [**Documento PDF Manual Despliegue Entrega 4 - Escalabilidad Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/files/15444574/Manual.de.despliegue.semana.8.pdf)
     * [**Video Entrega 4 - Sustentación - Aplicación Escalabilidad del Backend en GCP**](https://www.loom.com/share/21bed97fa4bd46bf8f4097e307505747)
 * **Arquitectura de la Aplicación**
-    * [**Página Wiki Entrega 4- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-Arquitectura-de-la-Aplicaci%C3%B3n:-International-FPV-Drone-Racing-League-(IDRL))
+    * [**Página Wiki Entrega 4- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/assets/142552861/55cf0843-6948-49fd-811e-8ef08eef75f1)
     * [**Diagrama de Despliegue de Aplicacion GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/assets/142732610/245f2c6c-3bb5-4149-be82-ed8de4cdbe6f)
     * [**Video Entrega 4 - Arquitectura de la Aplicación**](https://uniandes-my.sharepoint.com/:v:/g/personal/i_sinning_uniandes_edu_co/EVmEeCKRlv5Pi0TYBabZ7tYBVAl3yDI5p_HGdWi9Z2xuxQ?e=ozxHwc)
 
