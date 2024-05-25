@@ -655,11 +655,10 @@ class Consumer:
 def start_consumer():
     logger.info("Iniciando el consumidor en un hilo separado...")
     consumer = Consumer()
-    worker_thread = threading.Thread(target=consumer.consume_queue())
-    logger.info("Iniciando el consumidor en un hilo separado 2...")
+    worker_thread = threading.Thread(target=consumer.consume_queue(), daemon=True)
+    logger.info("Iniciando el consumidor en un hilo separado..")
     worker_thread.start()
-    logger.info("Iniciando el consumidor en un hilo separado 1...")
-
+    return jsonify({"message": "hilo iniciado"})
 
 if __name__ == '__main__':
 
