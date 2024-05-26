@@ -201,6 +201,53 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * [**Manual de Despliegue de la aplicación con escalabilidad en Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Configuraci%C3%B3n-y-Despliegue-en-GCP-%E2%80%90-Escalabilidad-Backend-%E2%80%90-International-FPV-Drone-Racing-League-(IDRL))
 
+## Semanas 7 – 8: Entrega 5 - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública
+
+### Actividades Previas - Entregas 1, 3 y 4:
+* **Aplicación web con funcionalidades básicas implementadas**
+    * [**Código API.py Inicial**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/blob/main/api.py)
+    * [**Release API Entrega 3**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v3.0) 
+    * [**Release API Entrega 4**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v4.0) 
+    * [**Pagina WIKI Entrega 1: Backend REST + Procesamiento Asíncrono**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-1:-Backend-REST---Procesamiento-As%C3%ADncrono)
+    * [**Página WIKI Entrega 1: Documentación en Postman**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Documentaci%C3%B3n-en-Postman-de-la-API-REST)
+    * [**Pagina de la wiki Entrega 3: Escalabilidad en la Capa Web - Diseño e Implementación de una Aplicación Web Escalable en Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-3:-Escalabilidad-en-la-Capa-Web-%E2%80%90-Dise%C3%B1o-e-Implementaci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-Escalabre-en-Nube-P%C3%BAblica)
+    * [**Pagina de la wiki Entrega 4: Escalabilidad en el Backend ‐ Diseño e Implementación de una Aplicación Web Escalable en la Nube Pública en GCP**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-4:-Escalabilidad-en-el-Backend-%E2%80%90-Dise%C3%B1o-e-Implementaci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-Escalable-en-la-Nube-P%C3%BAblica)
+
+
+### **Entregables Semana 7-8 - Entrega 5**:
+* **Modelo de Despliegue - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública**
+  * **Actividades requeridas para Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública**
+    * [**Pagina de la wiki Entrega 5: Despliegue en PaaS ‐ Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-5:-Despliegue-en-PaaS-%E2%80%90-Migraci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-a-una-Plataforma-PaaS-en-la-Nube-P%C3%BAblica)
+    * [**Release API Entrega 5**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/releases/tag/v5.0) 
+    * [**Workspace de Colecciones Postman: IDRL API**](https://www.postman.com/speeding-sunset-217733/workspace/public-idrl-api-uniandes/collection/5831053-9e42e5ab-53d2-4fc6-9081-d4d3a481e191)
+    * [**Documento PDF Manual Despliegue - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública Entrega 5**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/files/15444574/Manual.de.despliegue.semana.8.pdf) 
+    * **Video Entrega 5 - Sustentación**
+      * [**Video Entrega 5 - Sustentación - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública - Parte 1**](https://uniandes-my.sharepoint.com/:v:/g/personal/c_lesmesl_uniandes_edu_co/EXlqqxFtbHRCsMGZdqPWSo4BJfmf5ziyFSFOAn-srFxeZw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=IXzSf8)
+      * [**Video Entrega 5 - Sustentación - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública - Parte 2**](https://uniandes-my.sharepoint.com/:v:/g/personal/c_lesmesl_uniandes_edu_co/ETE_LYmA4iVImS-BOUaC0vQBl7lqfpdb54nsHaeE3xQF9w?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=lGdM1E)
+      
+* **Arquitectura de la Aplicación**
+    * [**Página Wiki Entrega 5- Arquitectura de la Aplicación**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-5:-Arquitectura-de-la-Aplicaci%C3%B3n:-International-FPV-Drone-Racing-League-(IDRL))
+    * [**Diagrama de Despliegue - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/assets/142732610/e0a7eed8-2cba-41ba-a07f-763dbcec9874)
+    * [**Video Entrega 5 - Arquitectura de la Aplicación**](https://uniandes-my.sharepoint.com/:v:/g/personal/c_lesmesl_uniandes_edu_co/EXlqqxFtbHRCsMGZdqPWSo4BJfmf5ziyFSFOAn-srFxeZw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=IXzSf8)
+
+
+* **Análisis de Capacidad**
+  * **Ejecución pruebas de estrés sobre el modelo de despliegue Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública Semana 7-8**
+     * [**Pagina Wiki Entrega 5 - Análisis de Capacidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Entrega-5:-An%C3%A1lisis-de-Capacidad-%E2%80%90-Despliegue-en-PaaS-%E2%80%90-Migraci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-a-una-Plataforma-PaaS-en-la-Nube-P%C3%BAblica)
+     * **Video de Pruebas Escenario 2 - Entrega 5**
+       * [**Escenario 1 - Experimento 1**](https://uniandes-my.sharepoint.com/:v:/g/personal/p_buitragom_uniandes_edu_co/Edpk9aELc3tJoQwkiowwt9kBE1TchKpps1dWEzhsa898fA?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=bbvS77)
+       * [**Escenario 1 - Experimento 2**](https://uniandes-my.sharepoint.com/:v:/g/personal/p_buitragom_uniandes_edu_co/EbXa9LwkO5tAgBZV-9KgZJsBq-QPkP45J8R4HRd4_RugKQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=sXecyX)
+       * [**Escenario 1 - Experimento 3**](https://uniandes-my.sharepoint.com/:v:/g/personal/p_buitragom_uniandes_edu_co/Ef1lvovpLUBCmB2H_eb52bkBrTxPQonXg5tJxHQTuT1JgQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=4vOVgC)
+     * **Video de Pruebas Escenario 2 - Entrega 5**
+       * [**Escenario 2 - Experimento 1**](https://uniandes-my.sharepoint.com/:v:/g/personal/p_buitragom_uniandes_edu_co/EXn3RQzcnhROia_5nzX3fMgBPZs-XPkhyL4QcBNo5Sy87Q?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=ityARm)
+       * [**Escenario 2 - Experimento 2**](https://uniandes-my.sharepoint.com/:v:/g/personal/p_buitragom_uniandes_edu_co/Ea0nbFCHCgdCrNfozYBqPZ4Bj0m3o2fGJK83eP6o0DwwDw?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=DOEyed)
+       * [**Escenario 2 - Experimento 3**](https://uniandes-my.sharepoint.com/:v:/g/personal/p_buitragom_uniandes_edu_co/Edpk9aELc3tJoQwkiowwt9kBE1TchKpps1dWEzhsa898fA?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=FiReiY)
+
+* [**Manual de Despliegue - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Despliegue-%E2%80%90-Migraci%C3%B3n-de-una-Aplicaci%C3%B3n-Web-a-una-Plataforma-PaaS-en-la-Nube-P%C3%BAblica)
+
+* **Otros**
+  * [**Documento de Comparación de soluciones SaaS**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Comparaci%C3%B3n-de-soluciones-SaaS)
+
 * **Otros**
   * [**Documento Arquitectura - Caso De Estudio En La Nube Pública COn Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Con-Alta-Disponibilidad)
 
