@@ -18,7 +18,40 @@ El backend REST de la aplicación web ha sido implementado para proporcionar a l
 |                 | Irina Sinning  | Desarrollador  |
 |                 |Camilo Lesmes  | Desarrollador |
 
-# Instrucciones de Instalación y Configuración
+
+# Instrucciones de Instalación y Configuración Google Cloud Run 
+
+
+
+# Manual de despliegue / configuración
+
+1. Debemos tener configurado el proyecto en la plataforma de Google Cloud Platform.
+2. Debemos activar la consola (shell) de Google Cloud Platform.
+3. Descargamos el archivo de despliegue que se ubica dentro del respositiorio de GitHub llamado `start_deploy.sh`
+
+```bash 
+# quitamos el blob de la url para descargar
+curl -L -o start_deploy.sh https://raw.githubusercontent.com/lesmesl/MISW-4203-Backend-Cloud/feat/pub-sub/start_deploy.sh
+```
+4. Ejecutamos el archivo de despliegue dentro del servidor con el siguiente comando:
+
+```bash
+sh start_deploy.sh
+```
+5. Una vez desplegado es importante verificar que el API y Worker dentro de Cloud Run estén activos. Una forma de verificar es ejecutando los siguientes endpoint:
+```bash 
+# API
+https://web-app-dpd6vwykta-uw.a.run.app/ping
+# response: pong
+
+# Consumer
+https://worker-app-dpd6vwykta-uw.a.run.app/ping
+# response: pong
+https://worker-app-dpd6vwykta-uw.a.run.app/cosumer
+# response: {"message": "hilo iniciado"}
+```
+
+# Instrucciones de Instalación y Configuración Local
 
 ## Paso 1: Levantar el Proyecto
 Para iniciar el proyecto, use el siguiente comando en su terminal:
@@ -201,6 +234,10 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * [**Manual de Despliegue de la aplicación con escalabilidad en Backend**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Manual-de-Configuraci%C3%B3n-y-Despliegue-en-GCP-%E2%80%90-Escalabilidad-Backend-%E2%80%90-International-FPV-Drone-Racing-League-(IDRL))
 
+* **Otros**
+  * [**Documento Arquitectura - Caso De Estudio En La Nube Pública COn Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Con-Alta-Disponibilidad)
+
+
 ## Semanas 7 – 8: Entrega 5 - Migración de una Aplicación Web a una Plataforma PaaS en la Nube Pública
 
 ### Actividades Previas - Entregas 1, 3 y 4:
@@ -247,7 +284,4 @@ https://www.pexels.com/video/a-woman-busy-writing-on-a-paper-4778723/
 
 * **Otros**
   * [**Documento de Comparación de soluciones SaaS**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Comparaci%C3%B3n-de-soluciones-SaaS)
-
-* **Otros**
-  * [**Documento Arquitectura - Caso De Estudio En La Nube Pública COn Alta Disponibilidad**](https://github.com/lesmesl/MISW-4203-Backend-Cloud/wiki/Arquitectura-%E2%80%90-Caso-De-Estudio-En-La-Nube-P%C3%BAblica-Con-Alta-Disponibilidad)
 
